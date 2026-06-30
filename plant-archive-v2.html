@@ -1,0 +1,1685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eef3ea" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="植物档案 V2" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <title>大小姐植物档案 V2</title>
+    <link rel="manifest" href="./site.webmanifest" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <style>
+      :root {
+        --bg: #f5f1e7;
+        --bg-soft: #eef3e7;
+        --bg-accent: #dde7d7;
+        --surface: rgba(255, 251, 246, 0.84);
+        --surface-strong: #fffdf8;
+        --surface-tint: rgba(240, 246, 235, 0.82);
+        --border: rgba(77, 97, 81, 0.12);
+        --border-strong: rgba(77, 97, 81, 0.2);
+        --text: #203126;
+        --text-soft: #536355;
+        --shadow-soft: 0 18px 44px rgba(74, 93, 77, 0.09);
+        --shadow-float: 0 28px 60px rgba(74, 93, 77, 0.13);
+        --radius-xxl: 36px;
+        --radius-xl: 28px;
+        --radius-lg: 22px;
+        --radius-md: 18px;
+        --radius-sm: 14px;
+        --mono: "SFMono-Regular", "JetBrains Mono", "Fira Code", "Menlo",
+          "Consolas", monospace;
+        --sans: "Inter", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC",
+          sans-serif;
+        --cy: #f4ccd7;
+        --qh: #8d3e59;
+        --hy: #47795e;
+        --lr: #86b255;
+        --gl: #b4d4a8;
+        --gy: #a7afb5;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        font-family: var(--sans);
+        color: var(--text);
+        background:
+          radial-gradient(circle at 0% 0%, rgba(193, 212, 183, 0.42), transparent 24%),
+          radial-gradient(circle at 90% 12%, rgba(211, 228, 202, 0.5), transparent 18%),
+          radial-gradient(circle at 50% 100%, rgba(223, 214, 194, 0.48), transparent 22%),
+          linear-gradient(180deg, #faf6ef 0%, #f4f1e8 42%, #eef3ea 100%);
+      }
+
+      body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(79, 101, 84, 0.03) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(79, 101, 84, 0.03) 1px, transparent 1px);
+        background-size: 26px 26px;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.75), transparent 88%);
+      }
+
+      button,
+      input,
+      select,
+      textarea {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      .page-shell {
+        width: min(1380px, calc(100vw - 32px));
+        margin: 0 auto;
+        padding: 28px 0 64px;
+      }
+
+      .hero {
+        position: relative;
+        overflow: hidden;
+        padding: 30px;
+        border-radius: var(--radius-xxl);
+        border: 1px solid var(--border);
+        background:
+          linear-gradient(135deg, rgba(255, 252, 246, 0.92), rgba(240, 246, 235, 0.88)),
+          linear-gradient(180deg, rgba(255, 255, 255, 0.4), transparent);
+        box-shadow: var(--shadow-float);
+        backdrop-filter: blur(18px);
+      }
+
+      .hero::before,
+      .hero::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+        z-index: 0;
+      }
+
+      .hero::before {
+        width: 420px;
+        height: 420px;
+        right: -120px;
+        top: -140px;
+        border-radius: 45% 55% 48% 52% / 58% 38% 62% 42%;
+        background: linear-gradient(160deg, rgba(138, 179, 129, 0.3), rgba(212, 226, 206, 0.05));
+        transform: rotate(12deg);
+        filter: blur(6px);
+      }
+
+      .hero::after {
+        width: 320px;
+        height: 320px;
+        left: -120px;
+        bottom: -170px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(198, 215, 191, 0.5), transparent 66%);
+      }
+
+      .dashboard-grid,
+      .list-toolbar,
+      .cards-grid {
+        display: grid;
+        gap: 18px;
+        position: relative;
+        z-index: 1;
+      }
+
+      .hero-copy-wrap {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 12px;
+        position: relative;
+        z-index: 2;
+        width: min(62%, 720px);
+        min-height: 300px;
+        padding: 18px 0 12px;
+      }
+
+      .hero-greeting {
+        margin: 0;
+        color: #5f745f;
+        font-size: 15px;
+        font-weight: 600;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(38px, 5vw, 60px);
+        line-height: 1;
+        letter-spacing: -0.05em;
+      }
+
+      .hero-subtitle {
+        max-width: 520px;
+        margin: 0;
+        color: var(--text-soft);
+        font-size: 15px;
+        line-height: 1.65;
+      }
+
+      .hero-briefing {
+        display: grid;
+        gap: 8px;
+        max-width: 560px;
+        padding: 16px 18px;
+        border-radius: 20px;
+        background: rgba(255, 253, 248, 0.66);
+        border: 1px solid rgba(121, 148, 115, 0.12);
+      }
+
+      .hero-briefing-label {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #698067;
+      }
+
+      .hero-briefing-copy {
+        margin: 0;
+        color: var(--text);
+        font-size: 15px;
+        line-height: 1.7;
+      }
+
+      .dashboard-card,
+      .plant-card,
+      .hero {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        box-shadow: var(--shadow-soft);
+        backdrop-filter: blur(18px);
+      }
+
+      .dashboard-label,
+      .toolbar-title,
+      .modal-label {
+        font-family: var(--mono);
+        font-size: 12px;
+        letter-spacing: 0.08em;
+        color: var(--text-soft);
+        text-transform: uppercase;
+      }
+
+      .hero {
+        position: relative;
+        overflow: visible;
+        border-radius: var(--radius-xxl);
+        padding: 26px 30px 24px;
+        background:
+          radial-gradient(circle at 14% 14%, rgba(184, 218, 173, 0.36), transparent 22%),
+          radial-gradient(circle at 86% 12%, rgba(213, 234, 208, 0.42), transparent 24%),
+          linear-gradient(180deg, rgba(247, 244, 236, 0.95), rgba(231, 240, 226, 0.92));
+      }
+
+      .hero::before,
+      .hero::after {
+        content: "";
+        position: absolute;
+        inset: auto;
+        border-radius: 50%;
+        pointer-events: none;
+      }
+
+      .hero::before {
+        width: 260px;
+        height: 260px;
+        right: -54px;
+        top: -36px;
+        background: rgba(158, 197, 154, 0.16);
+      }
+
+      .hero::after {
+        width: 210px;
+        height: 210px;
+        left: 8px;
+        bottom: -72px;
+        background: rgba(160, 197, 155, 0.14);
+      }
+
+      .hero-image-wrap {
+        position: relative;
+        position: absolute;
+        right: -54px;
+        top: -8px;
+        bottom: auto;
+        width: min(46%, 560px);
+        height: 320px;
+        pointer-events: none;
+        z-index: 3;
+      }
+
+      .hero-image-wrap::before,
+      .hero-image-wrap::after {
+        content: "";
+        position: absolute;
+        pointer-events: none;
+      }
+
+      .hero-image-wrap::before {
+        inset: 26px auto auto 54px;
+        width: 188px;
+        height: 240px;
+        border-radius: 58% 42% 55% 45% / 64% 38% 62% 36%;
+        background: rgba(169, 205, 162, 0.14);
+        transform: rotate(-18deg);
+      }
+
+      .hero-image-wrap::after {
+        left: 96px;
+        right: 74px;
+        bottom: 42px;
+        height: 86px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(120, 151, 111, 0.2), rgba(31, 79, 49, 0) 70%);
+        filter: blur(20px);
+      }
+
+      .hero-plant-image {
+        position: absolute;
+        right: 0;
+        top: -14px;
+        bottom: auto;
+        width: min(128%, 620px);
+        max-height: 420px;
+        object-fit: contain;
+        object-position: right top;
+        transform: translate(8px, 0) scale(1.1);
+        filter:
+          contrast(1.04)
+          saturate(1.02)
+          drop-shadow(0 28px 38px rgba(60, 95, 65, 0.16));
+      }
+
+      .dashboard-card {
+        padding: 16px 18px;
+        border-radius: var(--radius-lg);
+      }
+
+      .dashboard-value {
+        margin-top: 12px;
+        font-size: 31px;
+        font-weight: 700;
+        line-height: 1;
+      }
+
+      .dashboard-note {
+        margin-top: 10px;
+        color: var(--text-soft);
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        margin-top: 10px;
+        gap: 12px;
+      }
+
+      .dashboard-card {
+        background: linear-gradient(180deg, rgba(255, 253, 248, 0.94), rgba(238, 245, 233, 0.82));
+      }
+
+      .list-toolbar {
+        grid-template-columns: 1.5fr 0.95fr;
+        align-items: start;
+        gap: 16px;
+        margin-bottom: 18px;
+      }
+
+      .toolbar-title {
+        margin: 0 0 10px;
+        font-size: 11px;
+      }
+
+      .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .filter-chip,
+      .sort-select,
+      .text-input,
+      .text-area,
+      .score-input,
+      .modal-button,
+      .edit-button,
+      .cover-action {
+        border: 1px solid var(--border);
+        color: var(--text);
+      }
+
+      .filter-chip {
+        appearance: none;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.76);
+        font-family: var(--mono);
+        font-size: 13px;
+        transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+      }
+
+      .filter-chip:hover,
+      .filter-chip.active {
+        transform: translateY(-1px);
+        border-color: var(--border-strong);
+        background: rgba(232, 241, 227, 0.96);
+      }
+
+      .sort-select,
+      .text-input,
+      .score-input,
+      .text-area {
+        width: 100%;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.84);
+        outline: none;
+      }
+
+      .sort-select,
+      .text-input,
+      .score-input {
+        padding: 12px 14px;
+      }
+
+      .text-area {
+        min-height: 102px;
+        padding: 12px 14px;
+        resize: vertical;
+      }
+
+      .summary-line {
+        margin-top: 10px;
+        color: var(--text-soft);
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .family-stack {
+        display: grid;
+        gap: 34px;
+        margin-top: 32px;
+      }
+
+      .family-section {
+        display: grid;
+        gap: 22px;
+      }
+
+      .family-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 18px;
+        margin-bottom: 0;
+      }
+
+      .family-title-wrap {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        min-width: 0;
+      }
+
+      .family-title-group {
+        display: grid;
+        gap: 6px;
+        min-width: 0;
+      }
+
+      .family-code {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border-radius: 14px;
+        font-family: var(--mono);
+        font-size: 13px;
+        font-weight: 700;
+        color: #243127;
+      }
+
+      .family-title {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.12;
+      }
+
+      .family-subtitle {
+        margin-top: 4px;
+        color: var(--text-soft);
+        font-size: 14px;
+      }
+
+      .family-count {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.76);
+        border: 1px solid var(--border);
+        font-family: var(--mono);
+        color: var(--text-soft);
+        font-size: 13px;
+      }
+
+      .cards-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+      }
+
+      .plant-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        padding: 20px;
+        border-radius: 24px;
+        overflow: hidden;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .plant-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 30px 56px rgba(71, 92, 74, 0.15);
+        border-color: rgba(77, 97, 81, 0.18);
+      }
+
+      .plant-card.highlight {
+        border-color: rgba(107, 150, 99, 0.48);
+        box-shadow: 0 0 0 4px rgba(136, 182, 122, 0.16), 0 26px 52px rgba(71, 92, 74, 0.14);
+      }
+
+      .plant-card::before {
+        content: "";
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: 4px;
+        background: var(--family-color, #afcfa0);
+      }
+
+      .cover-area {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 16 / 10;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid rgba(77, 97, 81, 0.08);
+        background:
+          radial-gradient(circle at top right, rgba(255, 255, 255, 0.58), transparent 30%),
+          linear-gradient(180deg, rgba(220, 236, 212, 0.9), rgba(202, 223, 195, 0.72));
+      }
+
+      .cover-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      .cover-button {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 16px;
+        border: 0;
+        background: linear-gradient(180deg, rgba(33, 50, 38, 0.04), rgba(33, 50, 38, 0.26));
+        color: #f5f9f3;
+      }
+
+      .cover-button.no-image {
+        align-items: center;
+        justify-content: center;
+        color: var(--text-soft);
+        background: transparent;
+      }
+
+      .cover-placeholder {
+        display: grid;
+        justify-items: center;
+        gap: 10px;
+        text-align: center;
+      }
+
+      .cover-placeholder svg {
+        width: 42px;
+        height: 42px;
+        opacity: 0.75;
+      }
+
+      .cover-placeholder span {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .cover-placeholder small,
+      .cover-meta,
+      .cover-action-text {
+        color: var(--text-soft);
+      }
+
+      .cover-button.has-image .cover-action-text,
+      .cover-button.has-image .cover-meta {
+        color: rgba(245, 249, 243, 0.88);
+      }
+
+      .cover-caption {
+        display: grid;
+        gap: 6px;
+      }
+
+      .cover-meta {
+        font-family: var(--mono);
+        font-size: 11px;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .cover-action {
+        align-self: flex-end;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--text);
+        font-family: var(--mono);
+        font-size: 12px;
+      }
+
+      .card-top {
+        display: flex;
+        justify-content: space-between;
+        gap: 14px;
+        align-items: flex-start;
+      }
+
+      .card-top-left {
+        display: grid;
+        gap: 12px;
+        min-width: 0;
+        flex: 1 1 auto;
+      }
+
+      .card-top-right {
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-end;
+        gap: 10px;
+        flex: 0 0 auto;
+        flex-wrap: wrap;
+      }
+
+      .plant-id {
+        display: inline-flex;
+        align-items: center;
+        width: fit-content;
+        padding: 6px 10px;
+        border-radius: 10px;
+        background: rgba(36, 49, 39, 0.08);
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+      }
+
+      .family-tag {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: var(--family-color, #afcfa0);
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        color: #243127;
+      }
+
+      .edit-button {
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.82);
+        font-family: var(--mono);
+        font-size: 12px;
+        line-height: 1;
+      }
+
+      .plant-name {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.24;
+        word-break: break-word;
+      }
+
+      .score-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-top: 2px;
+      }
+
+      .score-pill {
+        padding: 7px 10px;
+        border-radius: 10px;
+        background: rgba(36, 49, 39, 0.08);
+        font-family: var(--mono);
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      .score-meter {
+        position: relative;
+        flex: 1;
+        height: 10px;
+        border-radius: 999px;
+        background: rgba(84, 102, 83, 0.12);
+        overflow: hidden;
+      }
+
+      .score-meter-bar {
+        position: absolute;
+        inset: 0 auto 0 0;
+        width: calc(var(--score, 0) * 10%);
+        border-radius: inherit;
+        background: linear-gradient(90deg, rgba(120, 151, 111, 0.45), var(--family-color, #afcfa0));
+      }
+
+      .kv-list {
+        display: grid;
+        gap: 10px;
+        margin-top: 2px;
+      }
+
+      .kv-row {
+        display: grid;
+        grid-template-columns: 104px minmax(0, 1fr);
+        gap: 10px;
+        align-items: start;
+        padding-top: 10px;
+        border-top: 1px dashed rgba(72, 89, 70, 0.12);
+      }
+
+      .kv-row:first-child {
+        padding-top: 0;
+        border-top: 0;
+      }
+
+      .kv-key {
+        font-family: var(--mono);
+        font-size: 12px;
+        color: var(--text-soft);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+
+      .kv-value {
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .empty-state {
+        padding: 44px 24px;
+        border-radius: 24px;
+        border: 1px dashed var(--border-strong);
+        color: var(--text-soft);
+        text-align: center;
+        background: rgba(255, 255, 255, 0.54);
+      }
+
+      .modal-shell {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 18px;
+        background: rgba(27, 39, 31, 0.34);
+        backdrop-filter: blur(10px);
+      }
+
+      .modal-shell.open {
+        display: flex;
+      }
+
+      .modal-panel {
+        width: min(680px, 100%);
+        max-height: calc(100vh - 36px);
+        overflow: auto;
+        padding: 24px;
+        border-radius: 28px;
+        border: 1px solid var(--border);
+        background: linear-gradient(180deg, rgba(255, 252, 247, 0.98), rgba(239, 245, 234, 0.94));
+        box-shadow: 0 32px 64px rgba(25, 39, 29, 0.22);
+      }
+
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 18px;
+        align-items: flex-start;
+        margin-bottom: 20px;
+      }
+
+      .modal-title {
+        margin: 8px 0 6px;
+        font-size: 28px;
+      }
+
+      .modal-subtitle {
+        color: var(--text-soft);
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .modal-grid {
+        display: grid;
+        gap: 14px;
+      }
+
+      .modal-field {
+        display: grid;
+        gap: 8px;
+      }
+
+      .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      .modal-button {
+        padding: 11px 16px;
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.82);
+      }
+
+      .modal-button.primary {
+        background: linear-gradient(180deg, #395644, #476c56);
+        color: #eef5ec;
+        border-color: rgba(57, 86, 68, 0.9);
+      }
+
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 22px;
+        z-index: 30;
+        transform: translate(-50%, 20px);
+        min-width: 240px;
+        max-width: calc(100vw - 32px);
+        padding: 13px 16px;
+        border-radius: 14px;
+        background: rgba(32, 49, 38, 0.92);
+        color: #f0f6ee;
+        text-align: center;
+        font-size: 14px;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s ease, transform 0.2s ease;
+      }
+
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      @media (max-width: 1160px) {
+        .hero-grid,
+        .dashboard-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .list-toolbar,
+        .cards-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+      }
+
+      @media (max-width: 860px) {
+        .page-shell {
+          width: min(100vw - 20px, 1380px);
+          padding-top: 20px;
+        }
+
+        .hero {
+          padding: 18px;
+        }
+
+        .dashboard-grid,
+        .list-toolbar,
+        .cards-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero-copy-wrap {
+          width: 100%;
+          min-height: auto;
+          padding: 0;
+          padding-right: 0;
+        }
+
+        .hero-image-wrap {
+          position: relative;
+          right: auto;
+          top: auto;
+          bottom: auto;
+          width: 100%;
+          height: 240px;
+          margin-top: 8px;
+        }
+
+        .hero-plant-image {
+          width: min(100%, 360px);
+          max-height: 250px;
+          right: 8px;
+          top: auto;
+          bottom: -4px;
+          transform: translate(0, 0) scale(1.03);
+          object-position: right bottom;
+        }
+
+        .family-header,
+        .modal-header,
+        .card-top {
+          flex-direction: column;
+        }
+
+        .family-header {
+          gap: 14px;
+        }
+
+        .family-title-wrap {
+          gap: 14px;
+        }
+
+        .family-count {
+          margin-top: 2px;
+        }
+
+        .family-section {
+          gap: 24px;
+        }
+
+        .card-top-right {
+          width: 100%;
+          justify-content: space-between;
+        }
+
+        .score-row {
+          flex-wrap: wrap;
+        }
+
+        .plant-name {
+          font-size: 22px;
+        }
+
+        .kv-row {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page-shell">
+      <section class="hero">
+        <div class="hero-copy-wrap">
+          <p class="hero-greeting">早安，大小姐 🌿</p>
+          <h1 id="heroTitle">今天的小森林状态不错</h1>
+          <p class="hero-subtitle" id="heroSubtitle">
+            有 4 株植物建议顺手看看，其中 3 株需要持续观察。
+          </p>
+          <div class="hero-briefing">
+            <div class="hero-briefing-label">今日简报</div>
+            <p class="hero-briefing-copy" id="heroBriefing">
+              正在整理今天的植物状态，请稍等。
+            </p>
+          </div>
+        </div>
+        <div class="hero-image-wrap">
+          <img
+            class="hero-plant-image"
+            id="heroPlantImage"
+            src="./plant-hero-morning.png"
+            alt="植物头图"
+          />
+        </div>
+
+        <div class="dashboard-grid" id="dashboardGrid"></div>
+      </section>
+
+      <section class="family-stack">
+        <div class="list-toolbar">
+          <section>
+            <h2 class="toolbar-title">筛选</h2>
+            <div class="filter-row" id="familyFilters"></div>
+            <div class="summary-line" id="filterSummary"></div>
+          </section>
+
+          <section>
+            <h2 class="toolbar-title">排序</h2>
+            <select id="sortSelect" class="sort-select">
+              <option value="desc">高到低</option>
+              <option value="asc">低到高</option>
+            </select>
+          </section>
+        </div>
+
+        <div id="familyStack"></div>
+      </section>
+    </main>
+
+    <input id="coverInput" type="file" accept="image/*" hidden />
+
+    <div class="modal-shell" id="editModal" aria-hidden="true">
+      <section class="modal-panel">
+        <div class="modal-header">
+          <div>
+            <div class="modal-label">Edit Plant Record</div>
+            <h2 class="modal-title" id="modalTitle">植物编辑</h2>
+            <div class="modal-subtitle" id="modalSubtitle">
+              仅修改状态评分、阶段、关注点和备注，保存后会写入浏览器本地。
+            </div>
+          </div>
+          <button type="button" class="modal-button" id="closeModalButton">
+            关闭
+          </button>
+        </div>
+
+        <form id="editForm">
+          <div class="modal-grid">
+            <label class="modal-field">
+              <span class="modal-label">Status Score</span>
+              <input
+                id="editScore"
+                class="score-input"
+                type="number"
+                min="0"
+                max="10"
+                step="0.1"
+                required
+              />
+            </label>
+
+            <label class="modal-field">
+              <span class="modal-label">Stage</span>
+              <input id="editStage" class="text-input" type="text" required />
+            </label>
+
+            <label class="modal-field">
+              <span class="modal-label">Focus</span>
+              <textarea id="editFocus" class="text-area" required></textarea>
+            </label>
+
+            <label class="modal-field">
+              <span class="modal-label">Note</span>
+              <textarea id="editNote" class="text-area" required></textarea>
+            </label>
+          </div>
+
+          <div class="modal-actions">
+            <button type="button" class="modal-button" id="cancelModalButton">
+              取消
+            </button>
+            <button type="submit" class="modal-button primary">保存修改</button>
+          </div>
+        </form>
+      </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+      const defaultPlants = [
+        {
+          id: "CY-001",
+          name: "白粉彩叶芋",
+          family: "彩叶芋",
+          code: "CY",
+          score: 9.0,
+          personality: "热闹型、爆盆选手、长叶机器",
+          stage: "稳定生长期",
+          light: "明亮散射光 + 补光灯",
+          watering: "保持微湿，后续建立湿度计数值",
+          focus: "观察新叶大小、颜色是否稳定，避免暴晒和长期积水",
+          note: "老叶轻微卷边属正常代谢",
+          cover: ""
+        },
+        {
+          id: "CY-002",
+          name: "红叶彩叶芋",
+          family: "彩叶芋",
+          code: "CY",
+          score: 9.8,
+          personality: "精品贵妇、颜值担当",
+          stage: "高速生长期",
+          light: "明亮散射光 + 补光灯",
+          watering: "水苔控水，掂重量判断",
+          focus: "保持叶色饱和，观察新芽展开",
+          note: "当前状态接近完美",
+          cover: ""
+        },
+        {
+          id: "CY-003",
+          name: "白绿彩叶芋",
+          family: "彩叶芋",
+          code: "CY",
+          score: 9.9,
+          personality: "学霸型、稳定、镇宅大盆候选",
+          stage: "旺盛生长期",
+          light: "明亮散射光 + 补光灯",
+          watering: "保持微湿但不积水",
+          focus: "继续观察爆芽和新叶数量",
+          note: "目前全家最佳状态之一",
+          cover: ""
+        },
+        {
+          id: "QH-001",
+          name: "银叶秋海棠",
+          family: "秋海棠",
+          code: "QH",
+          score: 8.8,
+          personality: "傲娇小姐、恢复型",
+          stage: "恢复生长期",
+          light: "明亮散射光",
+          watering: "微湿，不能长期湿",
+          focus: "叶缘焦边、湿度、控水",
+          note: "有新芽，说明根系还在恢复",
+          cover: ""
+        },
+        {
+          id: "QH-002",
+          name: "波点秋海棠",
+          family: "秋海棠",
+          code: "QH",
+          score: 9.5,
+          personality: "阳光女孩、快速长高型",
+          stage: "快速生长期",
+          light: "明亮散射光",
+          watering: "微湿，避免积水",
+          focus: "后续可修剪扦插，让株型更丰满",
+          note: "正在开花并持续长新叶",
+          cover: ""
+        },
+        {
+          id: "QH-003",
+          name: "银脉秋海棠",
+          family: "秋海棠",
+          code: "QH",
+          score: 9.5,
+          personality: "高冷艺术家",
+          stage: "青年分枝期",
+          light: "明亮散射光",
+          watering: "微湿，避免闷根",
+          focus: "保持通风，观察分枝",
+          note: "叶面银色状态优秀，叶背酒红",
+          cover: ""
+        },
+        {
+          id: "HY-001",
+          name: "黑叶海芋（左）",
+          family: "海芋",
+          code: "HY",
+          score: 9.2,
+          personality: "成熟女王、稳重型",
+          stage: "成熟爆盆期",
+          light: "明亮散射光",
+          watering: "见干见湿，避免积水",
+          focus: "老叶黄化正常，重点看新叶和基部是否健康",
+          note: "叶多且密，老叶代谢较明显",
+          cover: ""
+        },
+        {
+          id: "HY-002",
+          name: "黑叶海芋（右）",
+          family: "海芋",
+          code: "HY",
+          score: 9.8,
+          personality: "王者型、气场担当",
+          stage: "高速发育期",
+          light: "明亮散射光",
+          watering: "见干见湿，避免积水",
+          focus: "保持空间，避免叶片互相挡光",
+          note: "叶片挺立、叶脉清晰、状态优秀",
+          cover: ""
+        },
+        {
+          id: "LR-001",
+          name: "柠檬心叶蔓绿绒",
+          family: "蔓绿绒",
+          code: "LR",
+          score: 9.7,
+          personality: "阳光小狗、乐天派",
+          stage: "恢复后快速生长期",
+          light: "中高亮散射光",
+          watering: "可稍微干一点再浇",
+          focus: "可换大一号盆，后续可修剪回插",
+          note: "从软趴趴变得有韧劲，开始向上生长",
+          cover: ""
+        },
+        {
+          id: "LR-002",
+          name: "水培裂叶蔓绿绒",
+          family: "蔓绿绒",
+          code: "LR",
+          score: 8.5,
+          personality: "打不死的小战士",
+          stage: "恢复生长期",
+          light: "明亮散射光，避免贴玻璃暴热",
+          watering: "水培，定期换水",
+          focus: "老叶焦边不用纠结，重点观察新叶是否健康",
+          note: "历史焦边严重，但现在持续长新叶",
+          cover: ""
+        },
+        {
+          id: "GL-001",
+          name: "银斑葛 / 银皇后绿萝",
+          family: "葛类",
+          code: "GL",
+          score: 10,
+          personality: "温柔小精灵、佛系但很能长",
+          stage: "青年快速生长期",
+          light: "中高亮散射光",
+          watering: "可稍微干一点再浇",
+          focus: "后续可爬杆或垂吊，叶片会继续变大",
+          note: "银纹漂亮，新叶持续冒出",
+          cover: ""
+        },
+        {
+          id: "GY-001",
+          name: "银纹观叶植物（疑似西瓜皮椒草）",
+          family: "观叶植物",
+          code: "GY",
+          score: 8.0,
+          personality: "慢热贵公子",
+          stage: "恢复观察期",
+          light: "明亮散射光，避免直吹风",
+          watering: "控制浇水，避免闷根",
+          focus: "当前最需要观察，重点看未来一个月新叶是否完整",
+          note: "已加通气管改善闷根，开始长新叶",
+          cover: ""
+        }
+      ];
+
+      const familyMeta = {
+        CY: { name: "彩叶芋", color: "var(--cy)" },
+        QH: { name: "秋海棠", color: "var(--qh)" },
+        HY: { name: "海芋", color: "var(--hy)" },
+        LR: { name: "蔓绿绒", color: "var(--lr)" },
+        GL: { name: "葛类", color: "var(--gl)" },
+        GY: { name: "观叶植物", color: "var(--gy)" }
+      };
+
+      const STORAGE_KEY = "plant-archive-v2-store";
+      const EDITABLE_FIELDS = ["score", "stage", "focus", "note", "cover"];
+
+      const state = {
+        family: "ALL",
+        sort: "desc",
+        plants: loadPlants(),
+        editingId: null,
+        uploadTargetId: null
+      };
+
+      const dashboardGrid = document.getElementById("dashboardGrid");
+      const familyFilters = document.getElementById("familyFilters");
+      const familyStack = document.getElementById("familyStack");
+      const sortSelect = document.getElementById("sortSelect");
+      const filterSummary = document.getElementById("filterSummary");
+      const heroTitle = document.getElementById("heroTitle");
+      const heroSubtitle = document.getElementById("heroSubtitle");
+      const heroBriefing = document.getElementById("heroBriefing");
+      const heroPlantImage = document.getElementById("heroPlantImage");
+      const coverInput = document.getElementById("coverInput");
+      const editModal = document.getElementById("editModal");
+      const editForm = document.getElementById("editForm");
+      const modalTitle = document.getElementById("modalTitle");
+      const modalSubtitle = document.getElementById("modalSubtitle");
+      const editScore = document.getElementById("editScore");
+      const editStage = document.getElementById("editStage");
+      const editFocus = document.getElementById("editFocus");
+      const editNote = document.getElementById("editNote");
+      const toast = document.getElementById("toast");
+
+      const families = Object.entries(familyMeta);
+      let toastTimer = null;
+
+      function getStorageOverrides() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          return raw ? JSON.parse(raw) : {};
+        } catch (error) {
+          console.warn("Failed to read local storage", error);
+          return {};
+        }
+      }
+
+      function loadPlants() {
+        const overrides = getStorageOverrides();
+        return defaultPlants.map((plant) => ({
+          ...plant,
+          ...(overrides[plant.id] || {})
+        }));
+      }
+
+      function persistPlantOverride(plantId, patch) {
+        const overrides = getStorageOverrides();
+        overrides[plantId] = {
+          ...(overrides[plantId] || {}),
+          ...patch
+        };
+
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+          return true;
+        } catch (error) {
+          console.error("Failed to persist plant override", error);
+          showToast("保存失败，可能是图片过大或浏览器存储空间不足。");
+          return false;
+        }
+      }
+
+      function updatePlant(plantId, patch) {
+        const nextPlants = state.plants.map((plant) =>
+          plant.id === plantId ? { ...plant, ...patch } : plant
+        );
+
+        if (!persistPlantOverride(plantId, patch)) {
+          return;
+        }
+
+        state.plants = nextPlants;
+        render();
+      }
+
+      function getFilteredPlants() {
+        const filtered =
+          state.family === "ALL"
+            ? state.plants
+            : state.plants.filter((plant) => plant.code === state.family);
+
+        return [...filtered].sort((a, b) =>
+          state.sort === "desc" ? b.score - a.score : a.score - b.score
+        );
+      }
+
+      function getDashboardMetrics() {
+        const watchPlants = [...state.plants]
+          .filter((plant) => plant.score <= 8.8)
+          .sort((a, b) => a.score - b.score);
+        const duePlants = [...state.plants]
+          .filter((plant) => plant.score <= 9.0)
+          .sort((a, b) => a.score - b.score);
+        const watchList = watchPlants.length;
+        const checkToday = duePlants.length;
+        const avgScore =
+          state.plants.reduce((sum, plant) => sum + Number(plant.score), 0) /
+          state.plants.length;
+        const highest = [...state.plants].sort((a, b) => b.score - a.score)[0];
+        const lowest = [...state.plants].sort((a, b) => a.score - b.score)[0];
+
+        return {
+          duePlants,
+          watchPlants,
+          watchList,
+          checkToday,
+          avgScore,
+          highest,
+          lowest
+        };
+      }
+
+      function renderDashboard() {
+        const metrics = getDashboardMetrics();
+        const dueNames = metrics.duePlants.slice(0, 4).map((plant) => plant.name).join("、");
+        const watchNames = metrics.watchPlants.slice(0, 3).map((plant) => plant.name).join("、");
+        const cards = [
+          {
+            label: "今日待查",
+            value: metrics.checkToday,
+            note: dueNames || "今天暂无待查植物"
+          },
+          {
+            label: "重点观察",
+            value: metrics.watchList,
+            note: watchNames || "当前暂无重点观察植物"
+          },
+          {
+            label: "平均健康分",
+            value: metrics.avgScore.toFixed(1),
+            note: `${state.plants.length} 株植物的当前整体状态`
+          }
+        ];
+
+        dashboardGrid.innerHTML = cards
+          .map(
+            (card) => `
+              <article class="dashboard-card">
+                <div class="dashboard-label">${card.label}</div>
+                <div class="dashboard-value">${card.value}</div>
+                <div class="dashboard-note">${card.note}</div>
+              </article>
+            `
+          )
+          .join("");
+
+        heroTitle.textContent =
+          metrics.avgScore >= 9.2 ? "今天的小森林状态不错" : "今天的小森林需要一点照看";
+        heroSubtitle.textContent = `有 ${metrics.checkToday} 株植物建议顺手看看，其中 ${metrics.watchList} 株需要持续观察。`;
+        heroBriefing.innerHTML = `今日整体健康分 <strong>${metrics.avgScore.toFixed(
+          1
+        )}</strong>。状态最佳：<strong>${metrics.highest.name}</strong>。今日优先查看：<strong>${watchNames || metrics.lowest.name}</strong>。`;
+      }
+
+      function renderFilters() {
+        const filterItems = [
+          { code: "ALL", name: "全部家族" },
+          ...families.map(([code, meta]) => ({ code, name: meta.name }))
+        ];
+
+        familyFilters.innerHTML = filterItems
+          .map((item) => {
+            const active = item.code === state.family ? "active" : "";
+            return `
+              <button type="button" class="filter-chip ${active}" data-family="${item.code}">
+                ${item.code === "ALL" ? "ALL" : item.code} / ${item.name}
+              </button>
+            `;
+          })
+          .join("");
+
+        familyFilters.querySelectorAll("[data-family]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.family = button.dataset.family;
+            render();
+          });
+        });
+      }
+
+      function renderPlants() {
+        const visiblePlants = getFilteredPlants();
+        const grouped = families
+          .map(([code, meta]) => ({
+            code,
+            name: meta.name,
+            color: meta.color,
+            items: visiblePlants.filter((plant) => plant.code === code)
+          }))
+          .filter((group) => group.items.length > 0);
+
+        filterSummary.textContent =
+          state.family === "ALL"
+            ? `当前显示全部 ${visiblePlants.length} 盆植物，按评分${state.sort === "desc" ? "从高到低" : "从低到高"}排序。`
+            : `当前显示 ${familyMeta[state.family].name} 家族，共 ${visiblePlants.length} 盆，按评分${state.sort === "desc" ? "从高到低" : "从低到高"}排序。`;
+
+        if (!grouped.length) {
+          familyStack.innerHTML = `
+            <div class="empty-state">
+              当前筛选条件下没有植物数据，可以切换家族或调整排序查看。
+            </div>
+          `;
+          return;
+        }
+
+        familyStack.innerHTML = grouped
+          .map(
+            (group) => `
+              <section class="family-section">
+                <div class="family-header">
+                  <div class="family-title-wrap">
+                    <span class="family-code" style="background:${group.color};">${group.code}</span>
+                    <div class="family-title-group">
+                      <h2 class="family-title">${group.name}</h2>
+                    </div>
+                  </div>
+                  <div class="family-count">${group.items.length} plants</div>
+                </div>
+                <div class="cards-grid">
+                  ${group.items.map(renderPlantCard).join("")}
+                </div>
+              </section>
+            `
+          )
+          .join("");
+
+        bindCardEvents();
+      }
+
+      function renderPlantCard(plant) {
+        const scoreLabel =
+          plant.score >= 9.7 ? "S-level" : plant.score <= 8.8 ? "Watch" : "Stable";
+        const hasCover = Boolean(plant.cover);
+
+        return `
+          <article class="plant-card" data-plant-id="${plant.id}" style="--family-color:${familyMeta[plant.code].color}; --score:${plant.score};">
+            <div class="cover-area">
+              ${hasCover ? `<img class="cover-image" src="${plant.cover}" alt="${plant.name} 封面图" />` : ""}
+              <button
+                type="button"
+                class="cover-button ${hasCover ? "has-image" : "no-image"}"
+                data-upload-id="${plant.id}"
+                aria-label="${hasCover ? "更换" : "上传"} ${plant.name} 封面图"
+              >
+                ${
+                  hasCover
+                    ? `
+                      <div class="cover-caption">
+                        <span class="cover-meta">cover image</span>
+                        <span class="cover-action-text">点击更换封面</span>
+                      </div>
+                      <span class="cover-action">Replace Cover</span>
+                    `
+                    : `
+                      <div class="cover-placeholder">
+                        <svg viewBox="0 0 64 64" fill="none" aria-hidden="true">
+                          <path d="M31 56C22 49 15 37 15 25c0-7 5-14 14-16 10-2 20 6 20 17 0 13-7 24-18 30Z" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/>
+                          <path d="M31 56c1-11 1-22 4-32 2-7 6-12 13-16" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+                        </svg>
+                        <span>Upload Cover</span>
+                        <small>点击上传本地植物照片</small>
+                      </div>
+                    `
+                }
+              </button>
+            </div>
+
+            <div class="card-top">
+              <div class="card-top-left">
+                <span class="plant-id">${plant.id}</span>
+                <h3 class="plant-name">${plant.name}</h3>
+              </div>
+              <div class="card-top-right">
+                <span class="family-tag">${plant.family}</span>
+                <button type="button" class="edit-button" data-edit-id="${plant.id}">
+                  编辑
+                </button>
+              </div>
+            </div>
+
+            <div class="score-row">
+              <span class="score-pill">status ${plant.score.toFixed(1)} / 10</span>
+              <div class="score-meter"><span class="score-meter-bar"></span></div>
+              <span class="score-pill">${scoreLabel}</span>
+            </div>
+
+            <div class="kv-list">
+              ${renderKvRow("family", plant.family)}
+              ${renderKvRow("personality", plant.personality)}
+              ${renderKvRow("stage", plant.stage)}
+              ${renderKvRow("light", plant.light)}
+              ${renderKvRow("watering", plant.watering)}
+              ${renderKvRow("focus", plant.focus)}
+              ${renderKvRow("note", plant.note)}
+            </div>
+          </article>
+        `;
+      }
+
+      function renderKvRow(key, value) {
+        return `
+          <div class="kv-row">
+            <div class="kv-key">${key}:</div>
+            <div class="kv-value">${value}</div>
+          </div>
+        `;
+      }
+
+      function bindCardEvents() {
+        document.querySelectorAll("[data-edit-id]").forEach((button) => {
+          button.addEventListener("click", () => openEditModal(button.dataset.editId));
+        });
+
+        document.querySelectorAll("[data-upload-id]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.uploadTargetId = button.dataset.uploadId;
+            coverInput.click();
+          });
+        });
+      }
+
+      function openEditModal(plantId) {
+        const plant = state.plants.find((item) => item.id === plantId);
+        if (!plant) return;
+
+        state.editingId = plantId;
+        modalTitle.textContent = `${plant.name}`;
+        modalSubtitle.textContent = `${plant.id} / ${plant.family}。只会覆盖本地可编辑字段，不会改动默认数组。`;
+        editScore.value = Number(plant.score).toFixed(1);
+        editStage.value = plant.stage;
+        editFocus.value = plant.focus;
+        editNote.value = plant.note;
+        editModal.classList.add("open");
+        editModal.setAttribute("aria-hidden", "false");
+      }
+
+      function closeEditModal() {
+        state.editingId = null;
+        editModal.classList.remove("open");
+        editModal.setAttribute("aria-hidden", "true");
+      }
+
+      async function compressImageToBase64(file) {
+        const dataUrl = await readFileAsDataUrl(file);
+        const image = await loadImage(dataUrl);
+        const ratio = image.width > 800 ? 800 / image.width : 1;
+        const canvas = document.createElement("canvas");
+        canvas.width = Math.round(image.width * ratio);
+        canvas.height = Math.round(image.height * ratio);
+        const context = canvas.getContext("2d");
+        context.drawImage(image, 0, 0, canvas.width, canvas.height);
+        return canvas.toDataURL("image/jpeg", 0.86);
+      }
+
+      function readFileAsDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      function loadImage(source) {
+        return new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = source;
+        });
+      }
+
+      function showToast(message) {
+        toast.textContent = message;
+        toast.classList.add("show");
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2200);
+      }
+
+      function render() {
+        renderDashboard();
+        renderFilters();
+        renderPlants();
+      }
+
+      sortSelect.addEventListener("change", (event) => {
+        state.sort = event.target.value;
+        render();
+      });
+
+      coverInput.addEventListener("change", async (event) => {
+        const file = event.target.files?.[0];
+        if (!file || !state.uploadTargetId) {
+          return;
+        }
+
+        try {
+          const cover = await compressImageToBase64(file);
+          updatePlant(state.uploadTargetId, { cover });
+          showToast("封面图已更新并保存到本地。");
+        } catch (error) {
+          console.error("Failed to process image", error);
+          showToast("图片处理失败，请换一张图片再试。");
+        } finally {
+          coverInput.value = "";
+          state.uploadTargetId = null;
+        }
+      });
+
+      editForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        if (!state.editingId) return;
+
+        const nextScore = Math.min(10, Math.max(0, Number(editScore.value)));
+        if (Number.isNaN(nextScore)) {
+          showToast("请输入有效的状态评分。");
+          return;
+        }
+
+        updatePlant(state.editingId, {
+          score: Number(nextScore.toFixed(1)),
+          stage: editStage.value.trim(),
+          focus: editFocus.value.trim(),
+          note: editNote.value.trim()
+        });
+        closeEditModal();
+        showToast("植物档案已保存到本地。");
+      });
+
+      document.getElementById("closeModalButton").addEventListener("click", closeEditModal);
+      document.getElementById("cancelModalButton").addEventListener("click", closeEditModal);
+
+      editModal.addEventListener("click", (event) => {
+        if (event.target === editModal) {
+          closeEditModal();
+        }
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape" && state.editingId) {
+          closeEditModal();
+        }
+      });
+
+      render();
+    </script>
+  </body>
+</html>

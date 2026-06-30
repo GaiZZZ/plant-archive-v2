@@ -1,0 +1,21 @@
+{
+  "name": "大小姐植物档案 V2",
+  "short_name": "植物档案 V2",
+  "description": "记录植物状态、浇水、湿度和成长变化。",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f4f1e8",
+  "theme_color": "#eef3ea",
+  "icons": [
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "./apple-touch-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
