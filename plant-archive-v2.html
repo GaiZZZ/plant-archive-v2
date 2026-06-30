@@ -49,6 +49,8 @@
       body {
         margin: 0;
         min-height: 100vh;
+        overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
         font-family: var(--sans);
         color: var(--text);
         background:
@@ -82,9 +84,10 @@
       }
 
       .page-shell {
-        width: min(1380px, calc(100vw - 32px));
+        width: min(1380px, calc(100% - 32px));
         margin: 0 auto;
-        padding: 28px 0 64px;
+        padding: calc(28px + env(safe-area-inset-top, 0px)) 0
+          calc(64px + env(safe-area-inset-bottom, 0px));
       }
 
       .hero {
@@ -145,6 +148,7 @@
         position: relative;
         z-index: 2;
         width: min(62%, 720px);
+        max-width: 100%;
         min-height: 300px;
         padding: 18px 0 12px;
       }
@@ -159,7 +163,7 @@
       h1 {
         margin: 0;
         font-size: clamp(38px, 5vw, 60px);
-        line-height: 1;
+        line-height: 1.06;
         letter-spacing: -0.05em;
       }
 
@@ -308,6 +312,7 @@
       .dashboard-card {
         padding: 16px 18px;
         border-radius: var(--radius-lg);
+        min-width: 0;
       }
 
       .dashboard-value {
@@ -422,16 +427,16 @@
       }
 
       .family-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
         gap: 18px;
         margin-bottom: 0;
       }
 
       .family-title-wrap {
         display: flex;
-        align-items: flex-start;
+        align-items: center;
         gap: 12px;
         min-width: 0;
       }
@@ -455,7 +460,7 @@
       .family-title {
         margin: 0;
         font-size: 24px;
-        line-height: 1.12;
+        line-height: 1.18;
       }
 
       .family-subtitle {
@@ -473,6 +478,7 @@
         font-family: var(--mono);
         color: var(--text-soft);
         font-size: 13px;
+        white-space: nowrap;
       }
 
       .cards-grid {
@@ -854,12 +860,13 @@
 
       @media (max-width: 860px) {
         .page-shell {
-          width: min(100vw - 20px, 1380px);
+          width: min(calc(100% - 20px), 1380px);
           padding-top: 20px;
         }
 
         .hero {
-          padding: 18px;
+          padding: 18px 18px 16px;
+          border-radius: 28px;
         }
 
         .dashboard-grid,
@@ -873,6 +880,7 @@
           min-height: auto;
           padding: 0;
           padding-right: 0;
+          gap: 10px;
         }
 
         .hero-image-wrap {
@@ -881,18 +889,18 @@
           top: auto;
           bottom: auto;
           width: 100%;
-          height: 240px;
-          margin-top: 8px;
+          height: 220px;
+          margin-top: 4px;
         }
 
         .hero-plant-image {
-          width: min(100%, 360px);
-          max-height: 250px;
-          right: 8px;
-          top: auto;
-          bottom: -4px;
-          transform: translate(0, 0) scale(1.03);
-          object-position: right bottom;
+          width: min(100%, 340px);
+          max-height: 236px;
+          right: -4px;
+          top: -18px;
+          bottom: auto;
+          transform: translate(0, 0) scale(1.02);
+          object-position: right top;
         }
 
         .family-header,
@@ -902,7 +910,9 @@
         }
 
         .family-header {
-          gap: 14px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 10px;
         }
 
         .family-title-wrap {
@@ -910,7 +920,8 @@
         }
 
         .family-count {
-          margin-top: 2px;
+          width: fit-content;
+          margin-top: 0;
         }
 
         .family-section {
@@ -919,7 +930,7 @@
 
         .card-top-right {
           width: 100%;
-          justify-content: space-between;
+          justify-content: flex-start;
         }
 
         .score-row {
@@ -933,6 +944,233 @@
         .kv-row {
           grid-template-columns: 1fr;
           gap: 4px;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          width: calc(100% - 16px);
+          padding-top: calc(12px + env(safe-area-inset-top, 0px));
+          padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px));
+        }
+
+        .hero {
+          padding: 16px 14px 14px;
+          border-radius: 24px;
+        }
+
+        h1 {
+          font-size: 32px;
+          line-height: 1.08;
+          letter-spacing: -0.04em;
+        }
+
+        .hero-greeting {
+          font-size: 14px;
+        }
+
+        .hero-subtitle,
+        .hero-briefing-copy {
+          font-size: 14px;
+          line-height: 1.6;
+        }
+
+        .hero-briefing {
+          gap: 6px;
+          padding: 14px;
+          border-radius: 18px;
+        }
+
+        .hero-image-wrap {
+          height: 196px;
+          margin-top: 0;
+        }
+
+        .hero-plant-image {
+          width: min(100%, 312px);
+          max-height: 214px;
+          right: -8px;
+          top: -20px;
+        }
+
+        .dashboard-grid {
+          margin-top: 8px;
+          gap: 10px;
+        }
+
+        .dashboard-card {
+          padding: 14px 14px 15px;
+          border-radius: 18px;
+        }
+
+        .dashboard-value {
+          margin-top: 10px;
+          font-size: 28px;
+        }
+
+        .dashboard-note {
+          margin-top: 8px;
+          font-size: 12px;
+          line-height: 1.55;
+        }
+
+        .list-toolbar {
+          gap: 12px;
+          margin-bottom: 14px;
+        }
+
+        .toolbar-title {
+          margin-bottom: 8px;
+        }
+
+        .filter-row {
+          gap: 8px;
+        }
+
+        .filter-chip {
+          padding: 9px 12px;
+          font-size: 12px;
+        }
+
+        .sort-select {
+          padding: 11px 12px;
+        }
+
+        .summary-line {
+          margin-top: 8px;
+          font-size: 12px;
+        }
+
+        .family-stack {
+          margin-top: 24px;
+          gap: 28px;
+        }
+
+        .family-section {
+          gap: 16px;
+        }
+
+        .family-title-wrap {
+          gap: 10px;
+        }
+
+        .family-code,
+        .family-count {
+          padding: 7px 10px;
+          border-radius: 12px;
+          font-size: 12px;
+        }
+
+        .family-title {
+          font-size: 22px;
+        }
+
+        .cards-grid {
+          gap: 14px;
+        }
+
+        .plant-card {
+          gap: 16px;
+          padding: 16px;
+          border-radius: 22px;
+        }
+
+        .cover-area {
+          border-radius: 16px;
+        }
+
+        .cover-button {
+          padding: 14px;
+        }
+
+        .plant-name {
+          font-size: 20px;
+        }
+
+        .score-row {
+          gap: 10px;
+        }
+
+        .kv-list {
+          gap: 8px;
+        }
+
+        .kv-row {
+          padding-top: 8px;
+        }
+
+        .kv-key {
+          font-size: 11px;
+        }
+
+        .kv-value {
+          font-size: 13px;
+          line-height: 1.6;
+        }
+
+        .modal-panel {
+          padding: 18px;
+          border-radius: 24px;
+        }
+
+        .modal-title {
+          font-size: 24px;
+        }
+      }
+
+      @media (max-width: 430px) {
+        .hero-copy-wrap {
+          gap: 9px;
+        }
+
+        h1 {
+          font-size: 29px;
+        }
+
+        .hero-image-wrap {
+          height: 176px;
+        }
+
+        .hero-plant-image {
+          width: min(108%, 292px);
+          max-height: 196px;
+          right: -10px;
+          top: -18px;
+        }
+
+        .dashboard-card {
+          padding: 13px 13px 14px;
+        }
+
+        .family-header {
+          gap: 8px;
+        }
+
+        .family-title {
+          font-size: 20px;
+        }
+
+        .plant-card {
+          padding: 15px;
+        }
+
+        .card-top {
+          gap: 12px;
+        }
+
+        .card-top-left {
+          gap: 10px;
+        }
+
+        .card-top-right {
+          gap: 8px;
+        }
+
+        .edit-button,
+        .family-tag,
+        .plant-id,
+        .score-pill {
+          font-size: 11px;
         }
       }
     </style>
