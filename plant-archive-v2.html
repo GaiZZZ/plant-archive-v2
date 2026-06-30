@@ -46,9 +46,17 @@
         box-sizing: border-box;
       }
 
+      html {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+      }
+
       body {
         margin: 0;
         min-height: 100vh;
+        width: 100%;
+        max-width: 100%;
         overflow-x: hidden;
         -webkit-text-size-adjust: 100%;
         font-family: var(--sans);
@@ -181,8 +189,9 @@
         max-width: 560px;
         padding: 16px 18px;
         border-radius: 20px;
-        background: rgba(255, 253, 248, 0.66);
-        border: 1px solid rgba(121, 148, 115, 0.12);
+        background: linear-gradient(180deg, rgba(255, 253, 248, 0.92), rgba(244, 248, 239, 0.84));
+        border: 1px solid rgba(121, 148, 115, 0.14);
+        box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
       }
 
       .hero-briefing-label {
@@ -310,33 +319,58 @@
       }
 
       .dashboard-card {
-        padding: 16px 18px;
+        padding: 15px 16px 16px;
         border-radius: var(--radius-lg);
         min-width: 0;
+        display: grid;
+        align-content: start;
+        gap: 0;
+      }
+
+      .dashboard-card-filter {
+        cursor: pointer;
+        transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      }
+
+      .dashboard-card-filter:hover {
+        transform: translateY(-2px);
+        border-color: rgba(77, 97, 81, 0.24);
+        box-shadow: 0 20px 40px rgba(71, 92, 74, 0.13);
+      }
+
+      .dashboard-card-filter.active {
+        border-color: rgba(83, 127, 88, 0.34);
+        background: linear-gradient(180deg, rgba(246, 251, 243, 0.98), rgba(226, 239, 218, 0.88));
+        box-shadow: 0 0 0 3px rgba(134, 178, 85, 0.12), 0 18px 36px rgba(71, 92, 74, 0.12);
       }
 
       .dashboard-value {
-        margin-top: 12px;
+        margin-top: 10px;
         font-size: 31px;
         font-weight: 700;
         line-height: 1;
+        letter-spacing: -0.04em;
       }
 
       .dashboard-note {
-        margin-top: 10px;
+        margin-top: 8px;
         color: var(--text-soft);
         font-size: 13px;
-        line-height: 1.6;
+        line-height: 1.55;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
       }
 
       .dashboard-grid {
         grid-template-columns: repeat(3, minmax(0, 1fr));
-        margin-top: 10px;
-        gap: 12px;
+        margin-top: 12px;
+        gap: 10px;
       }
 
       .dashboard-card {
-        background: linear-gradient(180deg, rgba(255, 253, 248, 0.94), rgba(238, 245, 233, 0.82));
+        background: linear-gradient(180deg, rgba(255, 253, 248, 0.9), rgba(240, 246, 235, 0.76));
       }
 
       .list-toolbar {
@@ -642,19 +676,6 @@
         letter-spacing: 0.05em;
       }
 
-      .family-tag {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 6px 10px;
-        border-radius: 999px;
-        background: var(--family-color, #afcfa0);
-        font-family: var(--mono);
-        font-size: 12px;
-        font-weight: 700;
-        color: #243127;
-      }
-
       .edit-button {
         padding: 8px 12px;
         border-radius: 999px;
@@ -685,6 +706,11 @@
         font-family: var(--mono);
         font-size: 12px;
         white-space: nowrap;
+      }
+
+      .score-value {
+        min-width: 56px;
+        text-align: center;
       }
 
       .score-meter {
@@ -797,6 +823,33 @@
         gap: 14px;
       }
 
+      .modal-insight {
+        display: grid;
+        gap: 10px;
+        padding: 14px 16px;
+        border-radius: 18px;
+        border: 1px solid rgba(121, 148, 115, 0.12);
+        background: rgba(255, 253, 248, 0.74);
+      }
+
+      .modal-insight-grid {
+        display: grid;
+        gap: 10px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .modal-insight-item {
+        display: grid;
+        gap: 5px;
+        min-width: 0;
+      }
+
+      .modal-insight-value {
+        font-size: 13px;
+        line-height: 1.55;
+        color: var(--text);
+      }
+
       .modal-field {
         display: grid;
         gap: 8px;
@@ -861,10 +914,12 @@
       @media (max-width: 860px) {
         .page-shell {
           width: min(calc(100% - 20px), 1380px);
+          max-width: 100%;
           padding-top: 20px;
         }
 
         .hero {
+          overflow: hidden;
           padding: 18px 18px 16px;
           border-radius: 28px;
         }
@@ -891,12 +946,13 @@
           width: 100%;
           height: 220px;
           margin-top: 4px;
+          overflow: hidden;
         }
 
         .hero-plant-image {
           width: min(100%, 340px);
           max-height: 236px;
-          right: -4px;
+          right: 0;
           top: -18px;
           bottom: auto;
           transform: translate(0, 0) scale(1.02);
@@ -928,6 +984,26 @@
           gap: 24px;
         }
 
+        .cards-grid {
+          display: grid;
+          grid-auto-flow: column;
+          grid-auto-columns: minmax(78%, 320px);
+          grid-template-columns: none;
+          gap: 14px;
+          overflow-x: auto;
+          padding: 4px 2px 8px;
+          scroll-snap-type: x mandatory;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        .cards-grid::-webkit-scrollbar {
+          display: none;
+        }
+
+        .plant-card {
+          scroll-snap-align: start;
+        }
+
         .card-top-right {
           width: 100%;
           justify-content: flex-start;
@@ -950,6 +1026,7 @@
       @media (max-width: 640px) {
         .page-shell {
           width: calc(100% - 16px);
+          max-width: 100%;
           padding-top: calc(12px + env(safe-area-inset-top, 0px));
           padding-bottom: calc(44px + env(safe-area-inset-bottom, 0px));
         }
@@ -957,6 +1034,21 @@
         .hero {
           padding: 16px 14px 14px;
           border-radius: 24px;
+          min-height: 0;
+        }
+
+        .hero::before {
+          width: 180px;
+          height: 180px;
+          right: -28px;
+          top: -20px;
+        }
+
+        .hero::after {
+          width: 150px;
+          height: 150px;
+          left: -18px;
+          bottom: -48px;
         }
 
         h1 {
@@ -979,39 +1071,92 @@
           gap: 6px;
           padding: 14px;
           border-radius: 18px;
+          width: 100%;
+          max-width: none;
+          margin-top: 10px;
+        }
+
+        .hero-copy-wrap {
+          position: relative;
+          display: block;
+          min-height: 164px;
+          padding-right: 0;
+        }
+
+        .hero-greeting,
+        .hero-copy-wrap > h1,
+        .hero-subtitle {
+          max-width: calc(100% - 132px);
+        }
+
+        .hero-copy-wrap > h1,
+        .hero-subtitle {
+          margin-top: 8px;
         }
 
         .hero-image-wrap {
-          height: 196px;
+          position: absolute;
+          top: 6px;
+          right: 2px;
+          width: 164px;
+          height: 172px;
           margin-top: 0;
+          overflow: hidden;
+        }
+
+        .hero-image-wrap::before {
+          inset: 18px auto auto 22px;
+          width: 122px;
+          height: 142px;
+        }
+
+        .hero-image-wrap::after {
+          left: 52px;
+          right: 18px;
+          bottom: 24px;
+          height: 48px;
         }
 
         .hero-plant-image {
-          width: min(100%, 312px);
-          max-height: 214px;
-          right: -8px;
-          top: -20px;
+          width: 202px;
+          max-height: 202px;
+          right: -18px;
+          top: -10px;
+          object-position: right top;
         }
 
         .dashboard-grid {
-          margin-top: 8px;
-          gap: 10px;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          margin-top: 10px;
+          gap: 8px;
         }
 
         .dashboard-card {
-          padding: 14px 14px 15px;
-          border-radius: 18px;
+          padding: 12px 10px 12px;
+          border-radius: 16px;
         }
 
         .dashboard-value {
-          margin-top: 10px;
-          font-size: 28px;
+          margin-top: 8px;
+          font-size: 24px;
         }
 
         .dashboard-note {
-          margin-top: 8px;
-          font-size: 12px;
-          line-height: 1.55;
+          margin-top: 6px;
+          font-size: 10px;
+          line-height: 1.45;
+          -webkit-line-clamp: 4;
+        }
+
+        .dashboard-label {
+          font-size: 10px;
+          letter-spacing: 0.05em;
+        }
+
+        .cards-grid {
+          grid-auto-columns: minmax(84%, 292px);
+          gap: 12px;
+          padding-bottom: 6px;
         }
 
         .list-toolbar {
@@ -1113,6 +1258,16 @@
           border-radius: 24px;
         }
 
+        .modal-insight {
+          padding: 12px 14px;
+          border-radius: 16px;
+        }
+
+        .modal-insight-grid {
+          grid-template-columns: 1fr;
+          gap: 12px;
+        }
+
         .modal-title {
           font-size: 24px;
         }
@@ -1120,26 +1275,65 @@
 
       @media (max-width: 430px) {
         .hero-copy-wrap {
-          gap: 9px;
+          min-height: 150px;
         }
 
         h1 {
           font-size: 29px;
         }
 
+        .hero-greeting,
+        .hero-copy-wrap > h1,
+        .hero-subtitle {
+          max-width: calc(100% - 118px);
+        }
+
         .hero-image-wrap {
-          height: 176px;
+          top: 8px;
+          right: 0;
+          width: 144px;
+          height: 152px;
+        }
+
+        .hero-image-wrap::before {
+          inset: 16px auto auto 16px;
+          width: 108px;
+          height: 126px;
+        }
+
+        .hero-image-wrap::after {
+          left: 42px;
+          right: 14px;
+          bottom: 20px;
+          height: 42px;
         }
 
         .hero-plant-image {
-          width: min(108%, 292px);
-          max-height: 196px;
-          right: -10px;
-          top: -18px;
+          width: 180px;
+          max-height: 180px;
+          right: -16px;
+          top: -8px;
         }
 
         .dashboard-card {
-          padding: 13px 13px 14px;
+          padding: 11px 9px 11px;
+          border-radius: 15px;
+        }
+
+        .dashboard-value {
+          font-size: 22px;
+        }
+
+        .dashboard-note {
+          font-size: 9.5px;
+        }
+
+        .dashboard-label {
+          font-size: 9.5px;
+        }
+
+        .cards-grid {
+          grid-auto-columns: minmax(88%, 270px);
         }
 
         .family-header {
@@ -1243,6 +1437,24 @@
 
         <form id="editForm">
           <div class="modal-grid">
+            <section class="modal-insight">
+              <div class="modal-label">植物特征</div>
+              <div class="modal-insight-grid">
+                <div class="modal-insight-item">
+                  <span class="modal-label">Personality</span>
+                  <div class="modal-insight-value" id="detailPersonality"></div>
+                </div>
+                <div class="modal-insight-item">
+                  <span class="modal-label">Light</span>
+                  <div class="modal-insight-value" id="detailLight"></div>
+                </div>
+                <div class="modal-insight-item">
+                  <span class="modal-label">Watering</span>
+                  <div class="modal-insight-value" id="detailWatering"></div>
+                </div>
+              </div>
+            </section>
+
             <label class="modal-field">
               <span class="modal-label">Status Score</span>
               <input
@@ -1470,6 +1682,7 @@
 
       const state = {
         family: "ALL",
+        focusMode: "ALL",
         sort: "desc",
         plants: loadPlants(),
         editingId: null,
@@ -1490,6 +1703,9 @@
       const editForm = document.getElementById("editForm");
       const modalTitle = document.getElementById("modalTitle");
       const modalSubtitle = document.getElementById("modalSubtitle");
+      const detailPersonality = document.getElementById("detailPersonality");
+      const detailLight = document.getElementById("detailLight");
+      const detailWatering = document.getElementById("detailWatering");
       const editScore = document.getElementById("editScore");
       const editStage = document.getElementById("editStage");
       const editFocus = document.getElementById("editFocus");
@@ -1548,10 +1764,18 @@
       }
 
       function getFilteredPlants() {
-        const filtered =
+        let filtered = [...state.plants];
+
+        if (state.focusMode === "due") {
+          filtered = filtered.filter((plant) => plant.score <= 9.0);
+        } else if (state.focusMode === "watch") {
+          filtered = filtered.filter((plant) => plant.score <= 8.8);
+        }
+
+        filtered =
           state.family === "ALL"
-            ? state.plants
-            : state.plants.filter((plant) => plant.code === state.family);
+            ? filtered
+            : filtered.filter((plant) => plant.code === state.family);
 
         return [...filtered].sort((a, b) =>
           state.sort === "desc" ? b.score - a.score : a.score - b.score
@@ -1592,31 +1816,40 @@
           {
             label: "今日待查",
             value: metrics.checkToday,
-            note: dueNames || "今天暂无待查植物"
+            focusMode: "due",
+            active: state.focusMode === "due"
           },
           {
             label: "重点观察",
             value: metrics.watchList,
-            note: watchNames || "当前暂无重点观察植物"
+            focusMode: "watch",
+            active: state.focusMode === "watch"
           },
           {
             label: "平均健康分",
-            value: metrics.avgScore.toFixed(1),
-            note: `${state.plants.length} 株植物的当前整体状态`
+            value: metrics.avgScore.toFixed(1)
           }
         ];
 
         dashboardGrid.innerHTML = cards
           .map(
             (card) => `
-              <article class="dashboard-card">
+              <article class="dashboard-card ${card.focusMode ? "dashboard-card-filter" : ""} ${card.active ? "active" : ""}" ${card.focusMode ? `data-dashboard-filter="${card.focusMode}"` : ""}>
                 <div class="dashboard-label">${card.label}</div>
                 <div class="dashboard-value">${card.value}</div>
-                <div class="dashboard-note">${card.note}</div>
               </article>
             `
           )
           .join("");
+
+        dashboardGrid.querySelectorAll("[data-dashboard-filter]").forEach((card) => {
+          card.addEventListener("click", () => {
+            const nextMode = card.dataset.dashboardFilter;
+            state.focusMode = state.focusMode === nextMode ? "ALL" : nextMode;
+            render();
+            familyStack.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        });
 
         heroTitle.textContent =
           metrics.avgScore >= 9.2 ? "今天的小森林状态不错" : "今天的小森林需要一点照看";
@@ -1663,9 +1896,7 @@
           .filter((group) => group.items.length > 0);
 
         filterSummary.textContent =
-          state.family === "ALL"
-            ? `当前显示全部 ${visiblePlants.length} 盆植物，按评分${state.sort === "desc" ? "从高到低" : "从低到高"}排序。`
-            : `当前显示 ${familyMeta[state.family].name} 家族，共 ${visiblePlants.length} 盆，按评分${state.sort === "desc" ? "从高到低" : "从低到高"}排序。`;
+          `${state.focusMode === "due" ? "当前只显示今日待查植物" : state.focusMode === "watch" ? "当前只显示重点观察植物" : state.family === "ALL" ? "当前显示全部植物" : `当前显示 ${familyMeta[state.family].name} 家族植物`}，共 ${visiblePlants.length} 盆，按评分${state.sort === "desc" ? "从高到低" : "从低到高"}排序。`;
 
         if (!grouped.length) {
           familyStack.innerHTML = `
@@ -1701,8 +1932,6 @@
       }
 
       function renderPlantCard(plant) {
-        const scoreLabel =
-          plant.score >= 9.7 ? "S-level" : plant.score <= 8.8 ? "Watch" : "Stable";
         const hasCover = Boolean(plant.cover);
 
         return `
@@ -1744,7 +1973,6 @@
                 <h3 class="plant-name">${plant.name}</h3>
               </div>
               <div class="card-top-right">
-                <span class="family-tag">${plant.family}</span>
                 <button type="button" class="edit-button" data-edit-id="${plant.id}">
                   编辑
                 </button>
@@ -1752,17 +1980,12 @@
             </div>
 
             <div class="score-row">
-              <span class="score-pill">status ${plant.score.toFixed(1)} / 10</span>
               <div class="score-meter"><span class="score-meter-bar"></span></div>
-              <span class="score-pill">${scoreLabel}</span>
+              <span class="score-pill score-value">${plant.score.toFixed(1)}</span>
             </div>
 
             <div class="kv-list">
-              ${renderKvRow("family", plant.family)}
-              ${renderKvRow("personality", plant.personality)}
               ${renderKvRow("stage", plant.stage)}
-              ${renderKvRow("light", plant.light)}
-              ${renderKvRow("watering", plant.watering)}
               ${renderKvRow("focus", plant.focus)}
               ${renderKvRow("note", plant.note)}
             </div>
@@ -1798,7 +2021,10 @@
 
         state.editingId = plantId;
         modalTitle.textContent = `${plant.name}`;
-        modalSubtitle.textContent = `${plant.id} / ${plant.family}。只会覆盖本地可编辑字段，不会改动默认数组。`;
+        modalSubtitle.textContent = `${plant.id} / ${plant.family}。卡片只保留每日决策信息，植物特征收在这里查看。`;
+        detailPersonality.textContent = plant.personality;
+        detailLight.textContent = plant.light;
+        detailWatering.textContent = plant.watering;
         editScore.value = Number(plant.score).toFixed(1);
         editStage.value = plant.stage;
         editFocus.value = plant.focus;
