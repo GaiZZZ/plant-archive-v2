@@ -85,7 +85,7 @@
     </view>
 
     <view wx:else class="timeline-empty">
-      <text class="timeline-summary">还没有生命周期记录。给它拍第一张照片，就会点亮图鉴并留下第一次养护档案。</text>
+      <text class="timeline-summary">还没有生命周期记录。给它拍第一张照片，就会留下第一次养护档案。</text>
       <button class="detail-action primary" bindtap="chooseCover">拍第一张</button>
     </view>
   </view>

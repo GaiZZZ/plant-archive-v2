@@ -1,46 +1,60 @@
 <view class="page-shell">
   <view class="home-hero">
     <view class="hero-copy-wrap">
-      <text class="hero-greeting">Plant Pokédex</text>
-      <text class="hero-title">拍照点亮你的植物图鉴</text>
-      <text class="hero-subtitle">{{heroSubtitle}}</text>
+      <text class="hero-greeting">For You</text>
+      <text class="hero-title">识别、诊断、照顾你的植物</text>
+      <text class="hero-subtitle">拍照会先识别植物，再按识别或诊断模式展示结果；是否加入我的植物由你决定。</text>
     </view>
     <image
       class="home-hero-plant"
       src="/plant-hero-cutout.png"
       mode="aspectFit"
     />
-    <button class="hero-diagnosis-button" bindtap="startAiDiagnosis">拍照打卡</button>
+    <view class="hero-actions">
+      <button class="hero-diagnosis-button" bindtap="startIdentify">拍照识别</button>
+      <button class="hero-ghost-button" bindtap="startDiagnose">诊断</button>
+    </view>
   </view>
 
   <view class="section-tabs">
-    <button class="section-tab {{activeSection == 'today' ? 'active' : ''}}" data-section="today" bindtap="switchSection">今日</button>
-    <button class="section-tab {{activeSection == 'collection' ? 'active' : ''}}" data-section="collection" bindtap="switchSection">图鉴</button>
-    <button class="section-tab {{activeSection == 'capture' ? 'active' : ''}}" data-section="capture" bindtap="switchSection">拍照</button>
+    <button class="section-tab {{activeSection == 'forYou' ? 'active' : ''}}" data-section="forYou" bindtap="switchSection">推荐</button>
+    <button class="section-tab {{activeSection == 'diagnose' ? 'active' : ''}}" data-section="diagnose" bindtap="switchSection">诊断</button>
+    <button class="section-tab {{activeSection == 'identify' ? 'active' : ''}}" data-section="identify" bindtap="switchSection">识别</button>
+    <button class="section-tab {{activeSection == 'plants' ? 'active' : ''}}" data-section="plants" bindtap="switchSection">我的植物</button>
   </view>
 
-  <view wx:if="{{activeSection == 'today'}}" class="section-panel">
-    <view class="dashboard-grid compact">
-      <button
-        wx:for="{{dashboardCards}}"
-        wx:key="label"
-        class="dashboard-card {{item.focusMode ? 'dashboard-card-filter' : ''}} {{item.active ? 'active' : ''}}"
-        data-focus-mode="{{item.focusMode}}"
-        bindtap="onDashboardTap"
-      >
-        <text class="dashboard-label">{{item.label}}</text>
-        <text class="dashboard-value">{{item.value}}</text>
+  <view wx:if="{{activeSection == 'forYou'}}" class="section-panel">
+    <view class="quick-tool-row">
+      <button class="quick-tool-card identify" bindtap="startIdentify">
+        <text class="quick-tool-label">Identify</text>
+        <text class="quick-tool-title">拍照识别植物</text>
+        <text class="quick-tool-copy">不知道它是谁，就从这里开始。</text>
+      </button>
+      <button class="quick-tool-card diagnose" bindtap="startDiagnose">
+        <text class="quick-tool-label">Diagnose</text>
+        <text class="quick-tool-title">诊断健康问题</text>
+        <text class="quick-tool-copy">叶片发黄、卷边、斑点都先拍一张。</text>
       </button>
     </view>
 
-    <view class="brief-card">
-      <text class="toolbar-title">今日判断</text>
-      <text class="brief-copy">{{heroBriefing}}</text>
+    <view class="home-snapshot">
+      <view class="snapshot-item">
+        <text class="snapshot-value">{{homeStats.dueCount}}</text>
+        <text class="snapshot-label">今日待查</text>
+      </view>
+      <view class="snapshot-item">
+        <text class="snapshot-value">{{homeStats.watchCount}}</text>
+        <text class="snapshot-label">重点观察</text>
+      </view>
+      <view class="snapshot-item">
+        <text class="snapshot-value">{{homeStats.avgScore}}</text>
+        <text class="snapshot-label">平均健康</text>
+      </view>
     </view>
 
     <view class="section-heading">
-      <text class="section-title">优先查看</text>
-      <button class="text-link" data-section="collection" bindtap="switchSection">我的图鉴</button>
+      <text class="section-title">For You</text>
+      <button class="text-link" data-section="diagnose" bindtap="switchSection">去诊断</button>
     </view>
 
     <view class="priority-list" wx:if="{{todayPlants.length}}">
@@ -52,32 +66,11 @@
         </view>
         <view class="priority-actions">
           <text class="score-pill small">{{item.scoreText}}</text>
-          <button class="detail-button" data-plant-id="{{item.id}}" bindtap="capturePlant">打卡</button>
+          <button class="detail-button" data-plant-id="{{item.id}}" data-mode="diagnose" bindtap="capturePlant">诊断</button>
         </view>
       </view>
     </view>
     <view wx:else class="empty-state">今天没有需要优先查看的植物。</view>
-  </view>
-
-  <view wx:if="{{activeSection == 'capture'}}" class="section-panel">
-    <view class="diagnosis-card">
-      <view class="diagnosis-copy">
-        <text class="toolbar-title">拍照打卡</text>
-        <text class="diagnosis-title">给一盆植物拍一张近照</text>
-        <text class="diagnosis-text">第一次拍照会点亮图鉴；之后每次拍照都会进入这盆植物的生命周期档案，并生成一张 AI 养护策略占位卡。</text>
-      </view>
-    </view>
-
-    <view class="capture-list">
-      <view class="capture-card" wx:for="{{capturePlants}}" wx:key="id">
-        <view class="capture-main">
-          <text class="plant-id">{{item.id}}</text>
-          <text class="capture-name">{{item.name}}</text>
-          <text class="capture-meta">{{item.collected ? '已点亮' : '未收集'}} · {{item.momentCount}} 次打卡</text>
-        </view>
-        <button class="capture-button" data-plant-id="{{item.id}}" bindtap="capturePlant">拍照</button>
-      </view>
-    </view>
 
     <view class="diagnosis-result" wx:if="{{diagnosisResult}}">
       <image wx:if="{{diagnosisPhoto}}" class="diagnosis-image" src="{{diagnosisPhoto}}" mode="aspectFill" />
@@ -104,21 +97,134 @@
             <text class="action-item" wx:for="{{diagnosisResult.carePlan.items}}" wx:key="*this">{{item}}</text>
           </view>
         </view>
+        <button wx:if="{{pendingCapture}}" class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
+        <text wx:else class="result-saved-copy">结果已进入对应植物档案。</text>
       </view>
     </view>
 
-    <view class="diagnosis-result placeholder" wx:else>
-      <text class="result-title">打卡结果会显示在这里</text>
-      <text class="result-summary">照片会保存到该植物详情页的生命周期时间线。真实 AI 接入后，这里会生成健康判断、可能原因和接下来几天的养护策略。</text>
+    <view class="home-collection-preview">
+      <view class="home-progress-row">
+        <text class="home-progress-main">My Plants {{collectionStats.collected}} / {{collectionStats.total}}</text>
+        <text class="home-progress-sub">{{collectionStats.progressText}}</text>
+      </view>
+      <view class="collection-progress home">
+        <view class="collection-progress-bar" style="width: {{collectionStats.progressPercent}};"></view>
+      </view>
+      <view class="preview-plant-row">
+        <button
+          class="preview-plant-library-card {{entry.locked ? 'locked' : ''}}"
+          wx:for="{{plantPreview}}"
+          wx:for-item="entry"
+          wx:key="code"
+          data-section="plants"
+          bindtap="switchSection"
+        >
+          <image class="preview-plant-library-image" src="{{entry.cover}}" mode="aspectFit" />
+          <text class="preview-plant-library-name">{{entry.name}}</text>
+          <text class="preview-plant-state">{{entry.locked ? '未加入' : '已加入'}}</text>
+        </button>
+      </view>
     </view>
   </view>
 
-  <view wx:if="{{activeSection == 'collection'}}" class="section-panel">
+  <view wx:if="{{activeSection == 'diagnose'}}" class="section-panel">
+    <view class="scan-panel diagnose">
+      <text class="toolbar-title">Diagnose</text>
+      <text class="scan-title">拍下异常叶片，先识别再诊断</text>
+      <text class="scan-copy">不需要先加入我的植物。诊断完成后，你可以选择保存到植物档案。</text>
+      <button class="scan-button" bindtap="startDiagnose">开始诊断</button>
+    </view>
+
+    <view class="priority-list">
+      <view class="priority-card" wx:for="{{todayPlants}}" wx:key="id">
+        <view class="priority-main">
+          <text class="plant-id">{{item.id}}</text>
+          <text class="priority-name">{{item.name}}</text>
+          <text class="priority-focus">{{item.focus}}</text>
+        </view>
+        <view class="priority-actions">
+          <text class="score-pill small">{{item.scoreText}}</text>
+          <button class="detail-button" data-plant-id="{{item.id}}" data-mode="diagnose" bindtap="capturePlant">拍照</button>
+        </view>
+      </view>
+    </view>
+
+    <view class="diagnosis-result" wx:if="{{diagnosisResult}}">
+      <image wx:if="{{diagnosisPhoto}}" class="diagnosis-image" src="{{diagnosisPhoto}}" mode="aspectFill" />
+      <view class="result-body">
+        <text class="result-status">{{diagnosisResult.status}}</text>
+        <text class="result-title">{{diagnosisResult.title}}</text>
+        <view class="result-section">
+          <text class="result-label">{{diagnosisResult.diagnose.label}}</text>
+          <text class="result-section-title">{{diagnosisResult.diagnose.title}}</text>
+          <text class="result-summary">{{diagnosisResult.diagnose.copy}}</text>
+        </view>
+        <view class="result-section">
+          <text class="result-label">{{diagnosisResult.carePlan.label}}</text>
+          <text class="result-section-title">{{diagnosisResult.carePlan.title}}</text>
+          <view class="action-list">
+            <text class="action-item" wx:for="{{diagnosisResult.carePlan.items}}" wx:key="*this">{{item}}</text>
+          </view>
+        </view>
+        <button wx:if="{{pendingCapture}}" class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
+        <text wx:else class="result-saved-copy">结果已进入对应植物档案。</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeSection == 'identify'}}" class="section-panel">
+    <view class="scan-panel identify">
+      <text class="toolbar-title">Identify</text>
+      <text class="scan-title">拍照识别植物，再决定是否加入</text>
+      <text class="scan-copy">识别结果可以只看百科；点“加入我的植物”后，才会进入植物库和成长档案。</text>
+      <button class="scan-button" bindtap="startIdentify">开始识别</button>
+    </view>
+
+    <view class="preview-plant-row identify-preview">
+      <button
+        class="preview-plant-library-card {{entry.locked ? 'locked' : ''}}"
+        wx:for="{{plantPreview}}"
+        wx:for-item="entry"
+        wx:key="code"
+        data-plant-id="{{entry.plantId}}"
+        data-mode="identify"
+        bindtap="capturePlant"
+      >
+        <image class="preview-plant-library-image" src="{{entry.cover}}" mode="aspectFit" />
+        <text class="preview-plant-library-name">{{entry.name}}</text>
+        <text class="preview-plant-state">{{entry.locked ? '未加入' : '已加入'}}</text>
+      </button>
+    </view>
+
+    <view class="diagnosis-result" wx:if="{{diagnosisResult}}">
+      <image wx:if="{{diagnosisPhoto}}" class="diagnosis-image" src="{{diagnosisPhoto}}" mode="aspectFill" />
+      <view class="result-body">
+        <text class="result-status">{{diagnosisResult.status}}</text>
+        <text class="result-title">{{diagnosisResult.title}}</text>
+        <view class="result-section">
+          <text class="result-label">{{diagnosisResult.identify.label}}</text>
+          <text class="result-section-title">{{diagnosisResult.identify.title}}</text>
+          <text class="result-summary">{{diagnosisResult.identify.copy}}</text>
+        </view>
+        <view class="result-section">
+          <text class="result-label">{{diagnosisResult.carePlan.label}}</text>
+          <text class="result-section-title">{{diagnosisResult.carePlan.title}}</text>
+          <view class="action-list">
+            <text class="action-item" wx:for="{{diagnosisResult.carePlan.items}}" wx:key="*this">{{item}}</text>
+          </view>
+        </view>
+        <button wx:if="{{pendingCapture}}" class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
+        <text wx:else class="result-saved-copy">结果已进入对应植物档案。</text>
+      </view>
+    </view>
+  </view>
+
+  <view wx:if="{{activeSection == 'plants'}}" class="section-panel">
     <view class="collection-summary">
       <view class="collection-summary-top">
         <view>
-          <text class="toolbar-title">图鉴进度</text>
-          <text class="collection-summary-title">已点亮 {{collectionStats.collected}} / {{collectionStats.total}}</text>
+          <text class="toolbar-title">我的植物</text>
+          <text class="collection-summary-title">已加入 {{collectionStats.collected}} / {{collectionStats.total}}</text>
         </view>
         <text class="collection-progress-text">{{collectionStats.progressText}}</text>
       </view>
@@ -128,7 +234,7 @@
       <view class="collection-stats">
         <view class="collection-stat">
           <text class="collection-stat-value">{{collectionStats.collected}}</text>
-          <text class="collection-stat-label">已收集</text>
+          <text class="collection-stat-label">已加入</text>
         </view>
         <view class="collection-stat">
           <text class="collection-stat-value">{{collectionStats.checkins}}</text>
@@ -143,7 +249,7 @@
 
     <view class="toolbar">
       <view class="toolbar-panel filter-panel">
-        <text class="toolbar-title">我的植物图鉴</text>
+        <text class="toolbar-title">我的植物库</text>
         <view class="filter-row">
           <button
             wx:for="{{filterItems}}"
@@ -155,40 +261,40 @@
             {{item.label}}
           </button>
         </view>
-        <text class="summary-line">{{pokedexSummary}}</text>
+        <text class="summary-line">{{plantLibrarySummary}}</text>
       </view>
     </view>
 
-    <view class="pokedex-grid" wx:if="{{pokedexEntries.length}}">
+    <view class="plant-library-grid" wx:if="{{plantLibraryEntries.length}}">
       <view
-        class="pokedex-card {{entry.locked ? 'locked' : ''}}"
-        wx:for="{{pokedexEntries}}"
+        class="plant-library-card {{entry.locked ? 'locked' : ''}}"
+        wx:for="{{plantLibraryEntries}}"
         wx:for-item="entry"
         wx:key="code"
       >
         <button
-          class="pokedex-image-wrap"
+          class="plant-library-image-wrap"
           data-plant-id="{{entry.plantId}}"
           bindtap="capturePlant"
         >
           <image
-            class="pokedex-image"
+            class="plant-library-image"
             src="{{entry.cover}}"
             mode="aspectFit"
           />
-          <text class="pokedex-badge" style="background: {{entry.color}};">{{entry.code}}</text>
-          <text class="pokedex-lock">{{entry.locked ? '未点亮' : '已点亮'}}</text>
+          <text class="plant-library-badge" style="background: {{entry.color}};">{{entry.code}}</text>
+          <text class="plant-library-state">{{entry.locked ? '未加入' : '已加入'}}</text>
         </button>
 
-        <view class="pokedex-body">
-          <text class="pokedex-name">{{entry.name}}</text>
-          <text class="pokedex-status">{{entry.statusText}}</text>
-          <text class="pokedex-members">{{entry.speciesText}}</text>
-          <view class="pokedex-meta-row">
-            <text class="pokedex-meta">{{entry.memberText}}</text>
-            <text class="pokedex-meta">{{entry.albumText}}</text>
+        <view class="plant-library-body">
+          <text class="plant-library-name">{{entry.name}}</text>
+          <text class="plant-library-status">{{entry.statusText}}</text>
+          <text class="plant-library-members">{{entry.speciesText}}</text>
+          <view class="plant-library-meta-row">
+            <text class="plant-library-meta">{{entry.memberText}}</text>
+            <text class="plant-library-meta">{{entry.albumText}}</text>
           </view>
-          <view class="pokedex-actions">
+          <view class="plant-library-actions">
             <button
               class="detail-button"
               data-plant-id="{{entry.plantId}}"
@@ -201,13 +307,13 @@
               data-plant-id="{{entry.plantId}}"
               bindtap="capturePlant"
             >
-              {{entry.locked ? '点亮' : '打卡'}}
+              {{entry.locked ? '识别加入' : '打卡'}}
             </button>
           </view>
         </view>
       </view>
     </view>
-    <view wx:else class="empty-state">当前筛选条件下没有图鉴条目。</view>
+    <view wx:else class="empty-state">当前筛选条件下没有植物库条目。</view>
   </view>
 
   <view class="settings-panel">

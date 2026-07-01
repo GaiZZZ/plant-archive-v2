@@ -156,7 +156,7 @@ Page({
 
     this.refreshPlant();
     wx.showToast({
-      title: moments.length ? "已记录打卡" : "已点亮图鉴",
+      title: moments.length ? "已记录打卡" : "已加入植物",
       icon: "success"
     });
   },

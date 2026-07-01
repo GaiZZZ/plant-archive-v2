@@ -396,31 +396,41 @@ function checkDocsConsistency() {
     "Privacy copy should disclose photo usage for diagnosis material"
   );
   assert(
-    readme.includes("今日养护台、我的图鉴、拍照打卡") &&
-      onlineGuide.includes("植物图鉴收集") &&
-      submissionChecklist.includes("今日 / 图鉴 / 拍照") &&
-      submissionCopy.includes("生命周期打卡记录"),
+    readme.includes("推荐、诊断、识别、我的植物四入口") &&
+      onlineGuide.includes("我的植物档案") &&
+      submissionChecklist.includes("推荐 / 诊断 / 识别 / 我的植物") &&
+      submissionChecklist.includes("拍照识别和健康诊断是独立入口") &&
+      submissionChecklist.includes("加入我的植物") &&
+      submissionCopy.includes("加入我的植物"),
     "Docs should describe the collection and photo check-in product structure"
   );
   assert(
-    readme.includes("拍照识别 + 健康诊断 + 图鉴收集 + 成长相册") &&
+    readme.includes("拍照识别 + 健康诊断 + 我的植物 + 成长档案") &&
       onlineGuide.includes("拍照识别、健康诊断和 AI 养护策略") &&
       submissionChecklist.includes("拍照识别、健康诊断和 AI 养护策略") &&
       submissionCopy.includes("拍照识别、健康诊断和 AI 养护策略"),
     "Docs should keep the identify, diagnose, collect, and growth album positioning"
   );
   assert(
-    indexPage.includes("Plant Pokédex") &&
-      indexPage.includes("data-section=\"collection\"") &&
-      indexPage.includes("data-section=\"capture\"") &&
+    indexPage.includes("For You") &&
+      indexPage.includes("data-section=\"diagnose\"") &&
+      indexPage.includes("data-section=\"identify\"") &&
+      indexPage.includes("data-section=\"plants\"") &&
+      !indexPage.includes("data-section=\"capture\"") &&
       indexPage.includes("capturePlant") &&
       indexPage.includes("collectionStats") &&
-      indexPage.includes("pokedexEntries") &&
-      indexPage.includes("pokedex-card") &&
-      indexPage.includes("图鉴进度") &&
+      indexPage.includes("plantLibraryEntries") &&
+      indexPage.includes("plant-library-card") &&
+      indexPage.includes("我的植物") &&
       indexPage.includes("成长相册") &&
-      indexPage.includes("未点亮"),
-    "Home page should expose collection and photo check-in sections"
+      indexPage.includes("拍照识别植物") &&
+      indexPage.includes("诊断健康问题") &&
+      indexPage.includes("plantPreview") &&
+      indexPage.includes("My Plants") &&
+      indexPage.includes("加入我的植物") &&
+      indexPage.includes("savePendingCapture") &&
+      indexPage.includes("未加入"),
+    "Home page should expose PictureThis-style identify, diagnose, and my plants workflow"
   );
   assert(
     indexPage.includes("diagnosisResult.identify") &&

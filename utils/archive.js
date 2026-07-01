@@ -96,7 +96,7 @@ function buildGroupedPlants(families, visiblePlants) {
           lastMomentSummary:
             plant.moments && plant.moments.length
               ? plant.moments[0].summary
-              : "还没有拍照打卡，拍第一张就点亮图鉴。",
+              : "还没有拍照打卡，保存第一张照片后会进入植物档案。",
           scoreText: Number(plant.score).toFixed(1),
           scorePercent: `${Math.max(0, Math.min(100, Number(plant.score) * 10))}%`
         }))

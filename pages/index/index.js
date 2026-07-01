@@ -14,14 +14,19 @@ Page({
     family: "ALL",
     focusMode: "ALL",
     sort: "desc",
-    activeSection: "today",
+    activeSection: "forYou",
     plants: [],
     dashboardCards: [],
     filterItems: [],
     groupedPlants: [],
-    pokedexEntries: [],
+    plantLibraryEntries: [],
+    plantPreview: [],
     todayPlants: [],
-    capturePlants: [],
+    homeStats: {
+      dueCount: 0,
+      watchCount: 0,
+      avgScore: "0.0"
+    },
     collectionStats: {
       total: 0,
       collected: 0,
@@ -32,8 +37,10 @@ Page({
     },
     diagnosisPhoto: "",
     diagnosisResult: null,
+    pendingCapture: null,
+    captureMode: "diagnose",
     filterSummary: "",
-    pokedexSummary: "",
+    plantLibrarySummary: "",
     heroTitle: "今天的小森林状态不错",
     heroSubtitle: "",
     heroBriefing: "",
@@ -112,40 +119,40 @@ Page({
     });
     const metrics = getDashboardMetrics(this.data.plants);
     const todayPlants = (metrics.watchPlants.length ? metrics.watchPlants : metrics.duePlants)
-      .slice(0, 4)
+      .slice(0, 2)
       .map((plant) => ({
         ...plant,
         momentCount: plant.moments ? plant.moments.length : 0,
         scoreText: Number(plant.score).toFixed(1)
       }));
-    const capturePlants = this.data.plants.map((plant) => ({
-      ...plant,
-      collected: Boolean(plant.cover || (plant.moments && plant.moments.length)),
-      momentCount: plant.moments ? plant.moments.length : 0,
-      scoreText: Number(plant.score).toFixed(1)
-    }));
-    const pokedexEntries = this.getPokedexEntries(this.data.plants);
-    const visiblePokedexEntries =
+    const plantLibraryEntries = this.getPlantLibraryEntries(this.data.plants);
+    const visiblePlantLibraryEntries =
       this.data.family === "ALL"
-        ? pokedexEntries
-        : pokedexEntries.filter((entry) => entry.code === this.data.family);
-    const collectionStats = this.getCollectionStats(pokedexEntries);
-    const pokedexSummary =
+        ? plantLibraryEntries
+        : plantLibraryEntries.filter((entry) => entry.code === this.data.family);
+    const collectionStats = this.getCollectionStats(plantLibraryEntries);
+    const plantLibrarySummary =
       this.data.family === "ALL"
-        ? `当前显示全部图鉴条目，共 ${visiblePokedexEntries.length} 类植物。`
-        : `当前显示 ${familyMeta[this.data.family].name} 图鉴条目。`;
+        ? `当前显示全部植物库条目，共 ${visiblePlantLibraryEntries.length} 类植物。`
+        : `当前显示 ${familyMeta[this.data.family].name} 植物库条目。`;
+    const homeStats = {
+      dueCount: metrics.duePlants.length,
+      watchCount: metrics.watchPlants.length,
+      avgScore: metrics.avgScore.toFixed(1)
+    };
 
     this.setData({
       ...viewModel,
       todayPlants,
-      capturePlants,
-      pokedexEntries: visiblePokedexEntries,
-      pokedexSummary,
+      plantLibraryEntries: visiblePlantLibraryEntries,
+      plantPreview: plantLibraryEntries.slice(0, 3),
+      homeStats,
+      plantLibrarySummary,
       collectionStats
     });
   },
 
-  getPokedexEntries(plants) {
+  getPlantLibraryEntries(plants) {
     return Object.keys(familyMeta).map((code) => {
       const family = familyMeta[code];
       const members = plants.filter((plant) => plant.code === code);
@@ -177,7 +184,7 @@ Page({
         momentCount,
         memberText: `${members.length} 个养护档案`,
         speciesText: `${previewNames}${extraCount}`,
-        statusText: collected ? `已点亮 · ${momentCount} 次打卡` : "未解锁 · 拍第一张点亮",
+        statusText: collected ? `已加入 · ${momentCount} 次记录` : "未加入 · 识别后可保存",
         albumText: `${momentCount} 张成长照片`,
         collectedText: `${collectedMembers.length}/${members.length} 盆已开始养护`,
         scoreText: avgScore ? avgScore.toFixed(1) : "--"
@@ -221,18 +228,22 @@ Page({
     };
   },
 
-  formatDiagnosisResult(plant, moment, isFirstCapture) {
+  formatDiagnosisResult(plant, moment, isFirstCapture, mode, isSaved) {
     const score = Number(plant.score);
     const healthLevel = score >= 9.5 ? "状态优秀" : score >= 8.8 ? "基本健康" : "需要观察";
+    const modeText = mode === "identify" ? "识别完成" : "诊断完成";
+    const saveText = isFirstCapture ? "加入我的植物" : "保存到成长档案";
 
     return {
-      title: `${plant.name} 已进入养护档案`,
-      status: isFirstCapture ? "首次收集" : "新增打卡",
+      title: mode === "identify" ? `识别为 ${plant.name}` : `${plant.name} 健康诊断`,
+      status: isSaved ? "已保存" : modeText,
+      saveText,
+      saved: Boolean(isSaved),
       summary: moment.summary,
       identify: {
         label: "识别结果",
         title: plant.name,
-        copy: `${plant.family} · ${plant.code}。这张照片已归入你的植物图鉴。`
+        copy: `${plant.family} · ${plant.code}。你可以先查看结果，再决定是否加入我的植物。`
       },
       diagnose: {
         label: "健康诊断",
@@ -401,15 +412,44 @@ Page({
   },
 
   startAiDiagnosis() {
-    this.setData({
-      activeSection: "capture"
-    });
+    this.startDiagnose();
+  },
+
+  startDiagnose() {
+    this.startCaptureMode("diagnose");
+  },
+
+  startIdentify() {
+    this.startCaptureMode("identify");
+  },
+
+  startCaptureMode(mode) {
+    const target = this.data.todayPlants[0] || this.data.plants[0];
+
+    if (!target) {
+      wx.showToast({
+        title: "暂无植物档案",
+        icon: "none"
+      });
+      return;
+    }
+
+    this.capturePlantById(target.id, mode);
   },
 
   capturePlant(event) {
     const plantId = event.currentTarget.dataset.plantId;
+    const mode = event.currentTarget.dataset.mode || "diagnose";
+    this.capturePlantById(plantId, mode);
+  },
+
+  capturePlantById(plantId, mode) {
     const plant = this.data.plants.find((item) => item.id === plantId);
     if (!plant) return;
+
+    this.setData({
+      captureMode: mode
+    });
 
     ensurePrivacyAuthorized(() => {
       wx.chooseMedia({
@@ -421,10 +461,10 @@ Page({
           wx.saveFile({
             tempFilePath,
             success: (saveResult) => {
-              this.savePlantMoment(plant, saveResult.savedFilePath);
+              this.prepareCaptureResult(plant, saveResult.savedFilePath, mode);
             },
             fail: () => {
-              this.savePlantMoment(plant, tempFilePath);
+              this.prepareCaptureResult(plant, tempFilePath, mode);
             }
           });
         },
@@ -438,22 +478,59 @@ Page({
     });
   },
 
-  savePlantMoment(plant, photo) {
+  prepareCaptureResult(plant, photo, mode) {
     const moments = plant.moments || [];
     const isFirstCapture = !plant.cover && !moments.length;
     const moment = this.createMoment(plant, photo);
 
-    this.updatePlant(plant.id, {
-      cover: plant.cover || photo,
-      moments: [moment, ...moments]
-    });
     this.setData({
       diagnosisPhoto: photo,
-      diagnosisResult: this.formatDiagnosisResult(plant, moment, isFirstCapture),
-      activeSection: "capture"
+      diagnosisResult: this.formatDiagnosisResult(plant, moment, isFirstCapture, mode, false),
+      pendingCapture: {
+        plantId: plant.id,
+        photo,
+        moment,
+        isFirstCapture,
+        mode
+      },
+      activeSection: mode === "identify" ? "identify" : "diagnose"
     });
     wx.showToast({
-      title: isFirstCapture ? "已点亮图鉴" : "已记录打卡",
+      title: mode === "identify" ? "识别完成" : "诊断完成",
+      icon: "success"
+    });
+  },
+
+  savePendingCapture() {
+    const pendingCapture = this.data.pendingCapture;
+    if (!pendingCapture) return;
+
+    const plant = this.data.plants.find((item) => item.id === pendingCapture.plantId);
+    if (!plant) return;
+
+    this.savePlantMoment(plant, pendingCapture);
+  },
+
+  savePlantMoment(plant, pendingCapture) {
+    const moments = plant.moments || [];
+
+    this.updatePlant(plant.id, {
+      cover: plant.cover || pendingCapture.photo,
+      moments: [pendingCapture.moment, ...moments]
+    });
+    this.setData({
+      diagnosisResult: this.formatDiagnosisResult(
+        plant,
+        pendingCapture.moment,
+        pendingCapture.isFirstCapture,
+        pendingCapture.mode,
+        true
+      ),
+      pendingCapture: null,
+      activeSection: pendingCapture.mode === "identify" ? "identify" : "diagnose"
+    });
+    wx.showToast({
+      title: pendingCapture.isFirstCapture ? "已加入我的植物" : "已保存档案",
       icon: "success"
     });
   },
