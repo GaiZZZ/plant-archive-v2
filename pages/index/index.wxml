@@ -1,17 +1,17 @@
 <view class="page-shell">
   <view class="home-hero">
     <view class="hero-copy-wrap">
-      <text class="hero-greeting">AI Plant Care</text>
-      <text class="hero-title">今天先看哪一盆？</text>
+      <text class="hero-greeting">Plant Pokédex</text>
+      <text class="hero-title">拍照点亮你的植物图鉴</text>
       <text class="hero-subtitle">{{heroSubtitle}}</text>
     </view>
-    <button class="hero-diagnosis-button" bindtap="startAiDiagnosis">拍照 AI 诊断</button>
+    <button class="hero-diagnosis-button" bindtap="startAiDiagnosis">拍照打卡</button>
   </view>
 
   <view class="section-tabs">
     <button class="section-tab {{activeSection == 'today' ? 'active' : ''}}" data-section="today" bindtap="switchSection">今日</button>
-    <button class="section-tab {{activeSection == 'diagnosis' ? 'active' : ''}}" data-section="diagnosis" bindtap="switchSection">AI 诊断</button>
-    <button class="section-tab {{activeSection == 'archive' ? 'active' : ''}}" data-section="archive" bindtap="switchSection">档案</button>
+    <button class="section-tab {{activeSection == 'collection' ? 'active' : ''}}" data-section="collection" bindtap="switchSection">图鉴</button>
+    <button class="section-tab {{activeSection == 'capture' ? 'active' : ''}}" data-section="capture" bindtap="switchSection">拍照</button>
   </view>
 
   <view wx:if="{{activeSection == 'today'}}" class="section-panel">
@@ -35,7 +35,7 @@
 
     <view class="section-heading">
       <text class="section-title">优先查看</text>
-      <button class="text-link" data-section="archive" bindtap="switchSection">全部档案</button>
+      <button class="text-link" data-section="collection" bindtap="switchSection">我的图鉴</button>
     </view>
 
     <view class="priority-list" wx:if="{{todayPlants.length}}">
@@ -47,21 +47,31 @@
         </view>
         <view class="priority-actions">
           <text class="score-pill small">{{item.scoreText}}</text>
-          <button class="detail-button" data-plant-id="{{item.id}}" bindtap="openDetailPage">详情</button>
+          <button class="detail-button" data-plant-id="{{item.id}}" bindtap="capturePlant">打卡</button>
         </view>
       </view>
     </view>
     <view wx:else class="empty-state">今天没有需要优先查看的植物。</view>
   </view>
 
-  <view wx:if="{{activeSection == 'diagnosis'}}" class="section-panel">
+  <view wx:if="{{activeSection == 'capture'}}" class="section-panel">
     <view class="diagnosis-card">
       <view class="diagnosis-copy">
-        <text class="toolbar-title">AI 诊断</text>
-        <text class="diagnosis-title">上传一张植物近照</text>
-        <text class="diagnosis-text">下一步这里会接入 AI，基于叶片、盆土和当前档案给出养护策略。现在先把核心入口和结果区搭出来。</text>
+        <text class="toolbar-title">拍照打卡</text>
+        <text class="diagnosis-title">给一盆植物拍一张近照</text>
+        <text class="diagnosis-text">第一次拍照会点亮图鉴；之后每次拍照都会进入这盆植物的生命周期档案，并生成一张 AI 养护策略占位卡。</text>
       </view>
-      <button class="diagnosis-button" bindtap="startAiDiagnosis">选择照片</button>
+    </view>
+
+    <view class="capture-list">
+      <view class="capture-card" wx:for="{{capturePlants}}" wx:key="id">
+        <view class="capture-main">
+          <text class="plant-id">{{item.id}}</text>
+          <text class="capture-name">{{item.name}}</text>
+          <text class="capture-meta">{{item.collected ? '已点亮' : '未收集'}} · {{item.momentCount}} 次打卡</text>
+        </view>
+        <button class="capture-button" data-plant-id="{{item.id}}" bindtap="capturePlant">拍照</button>
+      </view>
     </view>
 
     <view class="diagnosis-result" wx:if="{{diagnosisResult}}">
@@ -77,15 +87,15 @@
     </view>
 
     <view class="diagnosis-result placeholder" wx:else>
-      <text class="result-title">诊断结果会显示在这里</text>
-      <text class="result-summary">健康判断、可能原因、浇水建议、光照建议和接下来 3 天操作，会形成一张可保存的养护策略卡。</text>
+      <text class="result-title">打卡结果会显示在这里</text>
+      <text class="result-summary">照片会保存到该植物详情页的生命周期时间线。真实 AI 接入后，这里会生成健康判断、可能原因和接下来几天的养护策略。</text>
     </view>
   </view>
 
-  <view wx:if="{{activeSection == 'archive'}}" class="section-panel">
+  <view wx:if="{{activeSection == 'collection'}}" class="section-panel">
     <view class="toolbar">
       <view class="toolbar-panel filter-panel">
-        <text class="toolbar-title">筛选</text>
+        <text class="toolbar-title">我的植物图鉴</text>
         <view class="filter-row">
           <button
             wx:for="{{filterItems}}"
@@ -129,7 +139,7 @@
             <button
               class="cover-area"
               data-plant-id="{{plant.id}}"
-              bindtap="chooseCover"
+              bindtap="capturePlant"
             >
               <image
                 wx:if="{{plant.cover}}"
@@ -139,16 +149,17 @@
               />
               <view wx:else class="cover-placeholder">
                 <text class="cover-icon">+</text>
-                <text class="cover-title">Upload Cover</text>
-                <text class="cover-subtitle">点击上传植物照片</text>
+                <text class="cover-title">拍照点亮图鉴</text>
+                <text class="cover-subtitle">记录它的第一天</text>
               </view>
-              <text wx:if="{{plant.cover}}" class="cover-action">更换封面</text>
+              <text wx:if="{{plant.cover}}" class="cover-action">{{plant.momentCount}} 次打卡</text>
             </button>
 
             <view class="card-top">
               <view class="card-title-group">
                 <text class="plant-id">{{plant.id}}</text>
                 <text class="plant-name">{{plant.name}}</text>
+                <text class="collection-state">{{plant.collected ? '已点亮图鉴' : '未收集 · 拍第一张点亮'}}</text>
               </view>
               <button
                 class="detail-button"
@@ -156,6 +167,13 @@
                 bindtap="openDetailPage"
               >
                 详情
+              </button>
+              <button
+                class="edit-button"
+                data-plant-id="{{plant.id}}"
+                bindtap="capturePlant"
+              >
+                打卡
               </button>
               <button
                 class="edit-button"
@@ -183,8 +201,8 @@
                 <text class="kv-value">{{plant.focus}}</text>
               </view>
               <view class="kv-row">
-                <text class="kv-key">note:</text>
-                <text class="kv-value">{{plant.note}}</text>
+                <text class="kv-key">last:</text>
+                <text class="kv-value">{{plant.lastMomentSummary}}</text>
               </view>
             </view>
           </view>

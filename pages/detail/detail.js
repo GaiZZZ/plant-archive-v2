@@ -11,6 +11,7 @@ Page({
   data: {
     plantId: "",
     plant: null,
+    moments: [],
     familyColor: "#b4d4a8",
     scorePercent: "0%"
   },
@@ -48,9 +49,37 @@ Page({
         ...plant,
         scoreText: Number(plant.score).toFixed(1)
       },
+      moments: (plant.moments || []).map((moment, index) => ({
+        ...moment,
+        displayDate: this.formatMomentDate(moment.createdAt),
+        indexText: `第 ${plant.moments.length - index} 次打卡`
+      })),
       familyColor: familyMeta[plant.code] ? familyMeta[plant.code].color : "#b4d4a8",
       scorePercent: `${Math.max(0, Math.min(100, Number(plant.score) * 10))}%`
     });
+  },
+
+  formatMomentDate(createdAt) {
+    const date = new Date(createdAt);
+    if (Number.isNaN(date.getTime())) return "未知时间";
+
+    const month = date.getMonth() + 1;
+    const day = date.getDate();
+    return `${month}月${day}日`;
+  },
+
+  createMoment(plant, photo) {
+    const now = new Date();
+    const score = Number(plant.score).toFixed(1);
+
+    return {
+      id: `${plant.id}-${now.getTime()}`,
+      photo,
+      createdAt: now.toISOString(),
+      stage: plant.stage,
+      summary: `本次打卡健康分 ${score}，先按当前养护方案继续观察。`,
+      advice: `AI 策略占位：结合 ${plant.light} 和 ${plant.watering}，后续会根据照片变化给出更具体建议。`
+    };
   },
 
   onShareAppMessage() {
@@ -115,11 +144,19 @@ Page({
   },
 
   saveCover(plantId, cover) {
-    if (!this.persistPlantOverride(plantId, { cover })) return;
+    const plant = this.loadPlant(plantId);
+    if (!plant) return;
+
+    const moments = plant.moments || [];
+    const moment = this.createMoment(plant, cover);
+    if (!this.persistPlantOverride(plantId, {
+      cover: plant.cover || cover,
+      moments: [moment, ...moments]
+    })) return;
 
     this.refreshPlant();
     wx.showToast({
-      title: "封面已更新",
+      title: moments.length ? "已记录打卡" : "已点亮图鉴",
       icon: "success"
     });
   },

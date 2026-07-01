@@ -31,27 +31,29 @@
     </view>
     <text class="stage-text">{{plant.stage}}</text>
     <view class="detail-actions">
-      <button class="detail-action primary" bindtap="chooseCover">更换封面</button>
+      <button class="detail-action primary" bindtap="chooseCover">拍照打卡</button>
       <button class="detail-action" bindtap="goHomeForEdit">回首页编辑</button>
     </view>
   </view>
 
   <view class="info-panel">
+    <text class="panel-title">植物百科方案</text>
     <view class="info-item">
-      <text class="panel-label">Personality</text>
+      <text class="panel-label">植物性格</text>
       <text class="info-value">{{plant.personality}}</text>
     </view>
     <view class="info-item">
-      <text class="panel-label">Light</text>
+      <text class="panel-label">光照偏好</text>
       <text class="info-value">{{plant.light}}</text>
     </view>
     <view class="info-item">
-      <text class="panel-label">Watering</text>
+      <text class="panel-label">浇水方案</text>
       <text class="info-value">{{plant.watering}}</text>
     </view>
   </view>
 
   <view class="info-panel">
+    <text class="panel-title">当前养护重点</text>
     <view class="info-item">
       <text class="panel-label">Focus</text>
       <text class="info-value">{{plant.focus}}</text>
@@ -59,6 +61,32 @@
     <view class="info-item">
       <text class="panel-label">Note</text>
       <text class="info-value">{{plant.note}}</text>
+    </view>
+  </view>
+
+  <view class="timeline-panel">
+    <view class="timeline-header">
+      <view>
+        <text class="panel-label">Lifecycle</text>
+        <text class="panel-title">生命周期档案</text>
+      </view>
+      <text class="timeline-count">{{moments.length}} 次打卡</text>
+    </view>
+
+    <view class="timeline-list" wx:if="{{moments.length}}">
+      <view class="timeline-item" wx:for="{{moments}}" wx:key="id">
+        <image wx:if="{{item.photo}}" class="timeline-photo" src="{{item.photo}}" mode="aspectFill" />
+        <view class="timeline-body">
+          <text class="timeline-date">{{item.displayDate}} · {{item.indexText}}</text>
+          <text class="timeline-summary">{{item.summary}}</text>
+          <text class="timeline-advice">{{item.advice}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="timeline-empty">
+      <text class="timeline-summary">还没有生命周期记录。给它拍第一张照片，就会点亮图鉴并留下第一次养护档案。</text>
+      <button class="detail-action primary" bindtap="chooseCover">拍第一张</button>
     </view>
   </view>
 </view>

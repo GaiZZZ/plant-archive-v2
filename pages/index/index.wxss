@@ -176,6 +176,58 @@
   padding: 28rpx;
 }
 
+.capture-list {
+  margin-top: 18rpx;
+}
+
+.capture-card {
+  display: flex;
+  align-items: center;
+  padding: 22rpx;
+  border: 1rpx solid rgba(77, 97, 81, 0.12);
+  border-radius: 22rpx;
+  background: rgba(255, 251, 246, 0.86);
+}
+
+.capture-card + .capture-card {
+  margin-top: 14rpx;
+}
+
+.capture-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.capture-name {
+  display: block;
+  margin-top: 8rpx;
+  color: #203126;
+  font-size: 29rpx;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.capture-meta,
+.collection-state {
+  display: block;
+  margin-top: 8rpx;
+  color: #698067;
+  font-size: 23rpx;
+  line-height: 1.4;
+}
+
+.capture-button {
+  flex: 0 0 auto;
+  width: 126rpx;
+  margin-left: 18rpx;
+  padding: 18rpx 12rpx;
+  border-radius: 18rpx;
+  color: #fffdf8;
+  background: #1f6f59;
+  font-size: 25rpx;
+  font-weight: 800;
+}
+
 .diagnosis-title {
   display: block;
   margin-top: 10rpx;

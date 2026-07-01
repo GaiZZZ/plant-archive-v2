@@ -17,7 +17,7 @@
     </view>
     <view class="item">
       <text class="item-title">本地缓存</text>
-      <text class="item-copy">用于保存植物评分、阶段、关注点、备注和封面路径。</text>
+      <text class="item-copy">用于保存植物评分、阶段、关注点、备注、封面路径和生命周期打卡记录。</text>
     </view>
     <view class="item">
       <text class="item-title">剪贴板</text>
@@ -32,7 +32,7 @@
 
   <view class="section">
     <text class="section-title">如何清除数据</text>
-    <text class="paragraph">可以回到首页底部点击“清空本地修改”，恢复为初始植物档案。也可以在微信中清理该小程序缓存。</text>
+    <text class="paragraph">可以回到首页底部点击“清空本地修改”，清除评分、备注、封面和生命周期打卡记录，恢复为初始植物档案。也可以在微信中清理该小程序缓存。</text>
   </view>
 
   <view class="section">

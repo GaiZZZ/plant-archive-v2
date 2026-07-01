@@ -20,6 +20,7 @@ Page({
     filterItems: [],
     groupedPlants: [],
     todayPlants: [],
+    capturePlants: [],
     diagnosisPhoto: "",
     diagnosisResult: null,
     filterSummary: "",
@@ -104,13 +105,48 @@ Page({
       .slice(0, 4)
       .map((plant) => ({
         ...plant,
+        momentCount: plant.moments ? plant.moments.length : 0,
         scoreText: Number(plant.score).toFixed(1)
       }));
+    const capturePlants = this.data.plants.map((plant) => ({
+      ...plant,
+      collected: Boolean(plant.cover || (plant.moments && plant.moments.length)),
+      momentCount: plant.moments ? plant.moments.length : 0,
+      scoreText: Number(plant.score).toFixed(1)
+    }));
 
     this.setData({
       ...viewModel,
-      todayPlants
+      todayPlants,
+      capturePlants
     });
+  },
+
+  createMoment(plant, photo) {
+    const now = new Date();
+    const score = Number(plant.score).toFixed(1);
+
+    return {
+      id: `${plant.id}-${now.getTime()}`,
+      photo,
+      createdAt: now.toISOString(),
+      stage: plant.stage,
+      summary: `本次打卡健康分 ${score}，先按当前养护方案继续观察。`,
+      advice: `AI 策略占位：结合 ${plant.light} 和 ${plant.watering}，后续会根据照片变化给出更具体建议。`
+    };
+  },
+
+  formatDiagnosisResult(plant, moment, isFirstCapture) {
+    return {
+      title: `${plant.name} 已进入养护档案`,
+      status: isFirstCapture ? "首次收集" : "新增打卡",
+      summary: moment.summary,
+      actions: [
+        moment.advice,
+        `固定百科方案：${plant.watering}`,
+        `光照偏好：${plant.light}`
+      ]
+    };
   },
 
   switchSection(event) {
@@ -263,6 +299,16 @@ Page({
   },
 
   startAiDiagnosis() {
+    this.setData({
+      activeSection: "capture"
+    });
+  },
+
+  capturePlant(event) {
+    const plantId = event.currentTarget.dataset.plantId;
+    const plant = this.data.plants.find((item) => item.id === plantId);
+    if (!plant) return;
+
     ensurePrivacyAuthorized(() => {
       wx.chooseMedia({
         count: 1,
@@ -270,19 +316,14 @@ Page({
         sourceType: ["album", "camera"],
         success: (res) => {
           const tempFilePath = res.tempFiles[0].tempFilePath;
-          this.setData({
-            diagnosisPhoto: tempFilePath,
-            diagnosisResult: {
-              title: "AI 诊断入口已就绪",
-              status: "等待接入真实 AI",
-              summary: "现在先保存照片和诊断流程位置；接入云函数后，这里会返回健康判断、可能原因和养护策略。",
-              actions: [
-                "检查叶片是否有卷边、黄斑或软塌",
-                "记录最近一次浇水时间和盆土湿度",
-                "补充光照环境，方便 AI 给出更准确建议"
-              ]
+          wx.saveFile({
+            tempFilePath,
+            success: (saveResult) => {
+              this.savePlantMoment(plant, saveResult.savedFilePath);
             },
-            activeSection: "diagnosis"
+            fail: () => {
+              this.savePlantMoment(plant, tempFilePath);
+            }
           });
         },
         fail: () => {
@@ -295,10 +336,30 @@ Page({
     });
   },
 
+  savePlantMoment(plant, photo) {
+    const moments = plant.moments || [];
+    const isFirstCapture = !plant.cover && !moments.length;
+    const moment = this.createMoment(plant, photo);
+
+    this.updatePlant(plant.id, {
+      cover: plant.cover || photo,
+      moments: [moment, ...moments]
+    });
+    this.setData({
+      diagnosisPhoto: photo,
+      diagnosisResult: this.formatDiagnosisResult(plant, moment, isFirstCapture),
+      activeSection: "capture"
+    });
+    wx.showToast({
+      title: isFirstCapture ? "已点亮图鉴" : "已记录打卡",
+      icon: "success"
+    });
+  },
+
   resetLocalArchive() {
     wx.showModal({
       title: "清空本地修改",
-      content: "将清除本机保存的评分、备注和封面，恢复为初始植物档案。",
+      content: "将清除本机保存的评分、备注、封面和生命周期打卡记录，恢复为初始植物档案。",
       confirmText: "清空",
       confirmColor: "#8d3e59",
       success: (res) => {

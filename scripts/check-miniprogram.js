@@ -233,12 +233,28 @@ function checkStorageLogic() {
     score: 99,
     stage: "安全阶段",
     focus: 123,
-    unknown: "should drop"
+    unknown: "should drop",
+    moments: [
+      {
+        id: "CY-001-1",
+        photo: "wxfile://capture.jpg",
+        createdAt: "2026-07-01T00:00:00.000Z",
+        summary: "第一次打卡",
+        advice: "保持观察",
+        stage: "稳定生长期"
+      },
+      {
+        id: "",
+        createdAt: "2026-07-01T00:00:00.000Z"
+      }
+    ]
   });
   assert(sanitized.score === 10, "Backup score should be clamped to 10");
   assert(sanitized.stage === "安全阶段", "Backup text field should be preserved");
   assert(sanitized.focus === undefined, "Backup non-string text field should be ignored");
   assert(sanitized.unknown === undefined, "Backup unknown fields should be ignored");
+  assert(sanitized.moments.length === 1, "Backup moments should keep only valid lifecycle records");
+  assert(sanitized.moments[0].summary === "第一次打卡", "Backup moments should preserve lifecycle summary");
 }
 
 function checkPrivacyLogic() {
@@ -325,6 +341,8 @@ function checkRuntimeJsCompatibility() {
 function checkDocsConsistency() {
   const onlineGuide = fs.readFileSync(path.join(ROOT, "WECHAT-MINIPROGRAM.md"), "utf8");
   const readme = fs.readFileSync(path.join(ROOT, "README.md"), "utf8");
+  const indexPage = fs.readFileSync(path.join(ROOT, "pages/index/index.wxml"), "utf8");
+  const detailPage = fs.readFileSync(path.join(ROOT, "pages/detail/detail.wxml"), "utf8");
   const privacyPage = fs.readFileSync(path.join(ROOT, "pages/privacy/privacy.wxml"), "utf8");
   const submissionChecklist = fs.readFileSync(
     path.join(ROOT, "MINIPROGRAM-SUBMISSION-CHECKLIST.md"),
@@ -377,11 +395,24 @@ function checkDocsConsistency() {
     "Privacy copy should disclose photo usage for diagnosis material"
   );
   assert(
-    readme.includes("AI 诊断入口") &&
-      onlineGuide.includes("AI 诊断入口") &&
-      submissionChecklist.includes("今日 / AI 诊断 / 档案") &&
-      submissionCopy.includes("诊断结果占位"),
-    "Docs should describe the AI diagnosis entry and three-section home structure"
+    readme.includes("今日养护台、我的图鉴、拍照打卡") &&
+      onlineGuide.includes("植物图鉴收集") &&
+      submissionChecklist.includes("今日 / 图鉴 / 拍照") &&
+      submissionCopy.includes("生命周期打卡记录"),
+    "Docs should describe the collection and photo check-in product structure"
+  );
+  assert(
+    indexPage.includes("Plant Pokédex") &&
+      indexPage.includes("data-section=\"collection\"") &&
+      indexPage.includes("data-section=\"capture\"") &&
+      indexPage.includes("capturePlant"),
+    "Home page should expose collection and photo check-in sections"
+  );
+  assert(
+    detailPage.includes("植物百科方案") &&
+      detailPage.includes("生命周期档案") &&
+      detailPage.includes("拍照打卡"),
+    "Detail page should include encyclopedia care plan and lifecycle timeline"
   );
 }
 

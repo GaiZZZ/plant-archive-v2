@@ -91,6 +91,12 @@ function buildGroupedPlants(families, visiblePlants) {
         .filter((plant) => plant.code === family.code)
         .map((plant) => ({
           ...plant,
+          collected: Boolean(plant.cover || (plant.moments && plant.moments.length)),
+          momentCount: plant.moments ? plant.moments.length : 0,
+          lastMomentSummary:
+            plant.moments && plant.moments.length
+              ? plant.moments[0].summary
+              : "还没有拍照打卡，拍第一张就点亮图鉴。",
           scoreText: Number(plant.score).toFixed(1),
           scorePercent: `${Math.max(0, Math.min(100, Number(plant.score) * 10))}%`
         }))
