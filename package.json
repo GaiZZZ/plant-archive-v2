@@ -1,0 +1,11 @@
+{
+  "name": "plant-archive-v2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "check": "node scripts/check-miniprogram.js",
+    "check:release": "node scripts/check-miniprogram.js --release",
+    "report:package": "node scripts/check-miniprogram.js --report",
+    "set:appid": "node scripts/set-appid.js"
+  }
+}

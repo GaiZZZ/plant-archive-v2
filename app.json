@@ -1,0 +1,20 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/detail/detail",
+    "pages/privacy/privacy"
+  ],
+  "window": {
+    "navigationBarTitleText": "植物档案 V2",
+    "navigationBarBackgroundColor": "#eef3ea",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f1e7"
+  },
+  "permission": {
+    "scope.camera": {
+      "desc": "用于拍摄植物照片，作为植物档案封面。"
+    }
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

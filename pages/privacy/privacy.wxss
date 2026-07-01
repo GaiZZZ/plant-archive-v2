@@ -1,0 +1,98 @@
+.privacy-shell {
+  padding: 28rpx 28rpx 72rpx;
+}
+
+.privacy-hero,
+.section {
+  border: 1rpx solid rgba(77, 97, 81, 0.12);
+  border-radius: 28rpx;
+  background: rgba(255, 251, 246, 0.86);
+  box-shadow: 0 18rpx 44rpx rgba(74, 93, 77, 0.09);
+}
+
+.privacy-hero {
+  padding: 34rpx 30rpx;
+}
+
+.eyebrow {
+  display: block;
+  color: #698067;
+  font-size: 21rpx;
+  letter-spacing: 1rpx;
+  text-transform: uppercase;
+}
+
+.title {
+  display: block;
+  margin-top: 12rpx;
+  color: #203126;
+  font-size: 44rpx;
+  font-weight: 800;
+  line-height: 1.18;
+}
+
+.intro {
+  display: block;
+  margin-top: 18rpx;
+  color: #536355;
+  font-size: 27rpx;
+  line-height: 1.62;
+}
+
+.section {
+  margin-top: 24rpx;
+  padding: 28rpx;
+}
+
+.section-title {
+  display: block;
+  color: #203126;
+  font-size: 31rpx;
+  font-weight: 800;
+}
+
+.item {
+  margin-top: 22rpx;
+  padding-top: 22rpx;
+  border-top: 1rpx solid rgba(77, 97, 81, 0.1);
+}
+
+.item-title {
+  display: block;
+  color: #47795e;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.item-copy,
+.paragraph {
+  display: block;
+  margin-top: 10rpx;
+  color: #536355;
+  font-size: 26rpx;
+  line-height: 1.6;
+}
+
+.backup-actions {
+  display: flex;
+  margin-top: 24rpx;
+}
+
+.backup-button {
+  flex: 1;
+  padding: 20rpx 18rpx;
+  border: 1rpx solid rgba(77, 97, 81, 0.12);
+  border-radius: 18rpx;
+  color: #203126;
+  background: rgba(255, 255, 255, 0.78);
+  font-size: 25rpx;
+}
+
+.backup-button + .backup-button {
+  margin-left: 16rpx;
+}
+
+.backup-button.primary {
+  color: #fffdf8;
+  background: #47795e;
+}

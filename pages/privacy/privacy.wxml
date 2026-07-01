@@ -1,0 +1,46 @@
+<view class="privacy-shell">
+  <view class="privacy-hero">
+    <text class="eyebrow">Privacy</text>
+    <text class="title">隐私与数据说明</text>
+    <text class="intro">植物档案 V2 当前是本地档案工具，不需要登录，也不会把你的植物记录上传到服务器。</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">会使用哪些能力</text>
+    <view class="item">
+      <text class="item-title">相机</text>
+      <text class="item-copy">用于拍摄植物照片，作为植物档案封面。</text>
+    </view>
+    <view class="item">
+      <text class="item-title">相册</text>
+      <text class="item-copy">用于选择本地植物照片，作为植物档案封面。</text>
+    </view>
+    <view class="item">
+      <text class="item-title">本地缓存</text>
+      <text class="item-copy">用于保存植物评分、阶段、关注点、备注和封面路径。</text>
+    </view>
+    <view class="item">
+      <text class="item-title">剪贴板</text>
+      <text class="item-copy">用于复制本地备份文本，或从剪贴板读取备份文本进行恢复。</text>
+    </view>
+  </view>
+
+  <view class="section">
+    <text class="section-title">不会做什么</text>
+    <text class="paragraph">当前版本不收集手机号、定位、通讯录、微信运动等信息；不包含登录、支付、广告、画像或第三方共享。</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">如何清除数据</text>
+    <text class="paragraph">可以回到首页底部点击“清空本地修改”，恢复为初始植物档案。也可以在微信中清理该小程序缓存。</text>
+  </view>
+
+  <view class="section">
+    <text class="section-title">备份与恢复</text>
+    <text class="paragraph">可以把本地修改复制为一段备份文本，之后从剪贴板恢复。恢复时只会读取已知植物和可编辑字段。封面路径只在当前微信客户端内更可靠，换设备后建议重新选择封面。</text>
+    <view class="backup-actions">
+      <button class="backup-button primary" bindtap="copyBackup">复制本地备份</button>
+      <button class="backup-button" bindtap="restoreBackup">从剪贴板恢复</button>
+    </view>
+  </view>
+</view>

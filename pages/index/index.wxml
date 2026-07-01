@@ -1,0 +1,231 @@
+<view class="page-shell">
+  <view class="hero">
+    <view class="hero-copy-wrap">
+      <text class="hero-greeting">早安，大小姐</text>
+      <text class="hero-title">{{heroTitle}}</text>
+      <text class="hero-subtitle">{{heroSubtitle}}</text>
+      <view class="hero-briefing">
+        <text class="hero-briefing-label">今日简报</text>
+        <text class="hero-briefing-copy">{{heroBriefing}}</text>
+      </view>
+    </view>
+
+    <image
+      class="hero-plant-image"
+      src="/plant-hero-morning.jpg"
+      mode="aspectFit"
+    />
+
+    <view class="dashboard-grid">
+      <button
+        wx:for="{{dashboardCards}}"
+        wx:key="label"
+        class="dashboard-card {{item.focusMode ? 'dashboard-card-filter' : ''}} {{item.active ? 'active' : ''}}"
+        data-focus-mode="{{item.focusMode}}"
+        bindtap="onDashboardTap"
+      >
+        <text class="dashboard-label">{{item.label}}</text>
+        <text class="dashboard-value">{{item.value}}</text>
+      </button>
+    </view>
+  </view>
+
+  <view class="toolbar">
+    <view class="toolbar-panel filter-panel">
+      <text class="toolbar-title">筛选</text>
+      <view class="filter-row">
+        <button
+          wx:for="{{filterItems}}"
+          wx:key="code"
+          class="filter-chip {{item.active ? 'active' : ''}}"
+          data-family="{{item.code}}"
+          bindtap="onFamilyTap"
+        >
+          {{item.label}}
+        </button>
+      </view>
+      <text class="summary-line">{{filterSummary}}</text>
+    </view>
+
+    <view class="toolbar-panel sort-panel">
+      <text class="toolbar-title">排序</text>
+      <picker
+        mode="selector"
+        range="{{sortOptions}}"
+        range-key="label"
+        value="{{sortIndex}}"
+        bindchange="onSortChange"
+      >
+        <view class="sort-select">{{sortLabel}}</view>
+      </picker>
+    </view>
+  </view>
+
+  <view class="family-stack" wx:if="{{groupedPlants.length}}">
+    <view class="family-section" wx:for="{{groupedPlants}}" wx:key="code">
+      <view class="family-header">
+        <view class="family-title-wrap">
+          <text class="family-code" style="background: {{item.color}};">{{item.code}}</text>
+          <text class="family-title">{{item.name}}</text>
+        </view>
+        <text class="family-count">{{item.items.length}} plants</text>
+      </view>
+
+      <view class="cards-grid">
+        <view class="plant-card" wx:for="{{item.items}}" wx:for-item="plant" wx:key="id">
+          <button
+            class="cover-area"
+            data-plant-id="{{plant.id}}"
+            bindtap="chooseCover"
+          >
+            <image
+              wx:if="{{plant.cover}}"
+              class="cover-image"
+              src="{{plant.cover}}"
+              mode="aspectFill"
+            />
+            <view wx:else class="cover-placeholder">
+              <text class="cover-icon">+</text>
+              <text class="cover-title">Upload Cover</text>
+              <text class="cover-subtitle">点击上传植物照片</text>
+            </view>
+            <text wx:if="{{plant.cover}}" class="cover-action">更换封面</text>
+          </button>
+
+          <view class="card-top">
+            <view class="card-title-group">
+              <text class="plant-id">{{plant.id}}</text>
+              <text class="plant-name">{{plant.name}}</text>
+            </view>
+            <button
+              class="detail-button"
+              data-plant-id="{{plant.id}}"
+              bindtap="openDetailPage"
+            >
+              详情
+            </button>
+            <button
+              class="edit-button"
+              data-plant-id="{{plant.id}}"
+              bindtap="openEditModal"
+            >
+              编辑
+            </button>
+          </view>
+
+          <view class="score-row">
+            <view class="score-meter">
+              <view class="score-meter-bar" style="width: {{plant.scorePercent}};"></view>
+            </view>
+            <text class="score-pill">{{plant.scoreText}}</text>
+          </view>
+
+          <view class="kv-list">
+            <view class="kv-row">
+              <text class="kv-key">stage:</text>
+              <text class="kv-value">{{plant.stage}}</text>
+            </view>
+            <view class="kv-row">
+              <text class="kv-key">focus:</text>
+              <text class="kv-value">{{plant.focus}}</text>
+            </view>
+            <view class="kv-row">
+              <text class="kv-key">note:</text>
+              <text class="kv-value">{{plant.note}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <view wx:else class="empty-state">当前筛选条件下没有植物数据。</view>
+
+  <view class="settings-panel">
+    <view>
+      <text class="settings-title">本地档案</text>
+      <text class="settings-copy">编辑内容只保存在当前微信客户端，可随时清空本地修改。</text>
+    </view>
+    <view class="settings-actions">
+      <button class="privacy-button" bindtap="openPrivacyPage">隐私说明</button>
+      <button class="reset-button" bindtap="resetLocalArchive">清空本地修改</button>
+    </view>
+  </view>
+</view>
+
+<view wx:if="{{modalOpen}}" class="modal-shell" catchtap="closeEditModal">
+  <view class="modal-panel" catchtap="noop">
+    <view class="modal-header">
+      <view>
+        <text class="modal-label">Edit Plant Record</text>
+        <text class="modal-title">{{editModel.name}}</text>
+        <text class="modal-subtitle">{{editModel.id}} / {{editModel.family}}。植物特征收在这里查看。</text>
+      </view>
+      <button class="modal-button" bindtap="closeEditModal">关闭</button>
+    </view>
+
+    <view class="modal-insight">
+      <text class="modal-label">植物特征</text>
+      <view class="modal-insight-grid">
+        <view class="modal-insight-item">
+          <text class="modal-label">Personality</text>
+          <text class="modal-insight-value">{{editModel.personality}}</text>
+        </view>
+        <view class="modal-insight-item">
+          <text class="modal-label">Light</text>
+          <text class="modal-insight-value">{{editModel.light}}</text>
+        </view>
+        <view class="modal-insight-item">
+          <text class="modal-label">Watering</text>
+          <text class="modal-insight-value">{{editModel.watering}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="modal-field">
+      <text class="modal-label">Status Score</text>
+      <input
+        class="text-input"
+        type="digit"
+        value="{{editModel.score}}"
+        data-field="score"
+        bindinput="onEditInput"
+      />
+    </view>
+
+    <view class="modal-field">
+      <text class="modal-label">Stage</text>
+      <input
+        class="text-input"
+        value="{{editModel.stage}}"
+        data-field="stage"
+        bindinput="onEditInput"
+      />
+    </view>
+
+    <view class="modal-field">
+      <text class="modal-label">Focus</text>
+      <textarea
+        class="text-area"
+        value="{{editModel.focus}}"
+        data-field="focus"
+        bindinput="onEditInput"
+      />
+    </view>
+
+    <view class="modal-field">
+      <text class="modal-label">Note</text>
+      <textarea
+        class="text-area"
+        value="{{editModel.note}}"
+        data-field="note"
+        bindinput="onEditInput"
+      />
+    </view>
+
+    <view class="modal-actions">
+      <button class="modal-button" bindtap="closeEditModal">取消</button>
+      <button class="modal-button primary" bindtap="submitEdit">保存修改</button>
+    </view>
+  </view>
+</view>

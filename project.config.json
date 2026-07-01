@@ -1,0 +1,140 @@
+{
+  "description": "大小姐植物档案 V2 微信小程序",
+  "packOptions": {
+    "ignore": [
+      {
+        "value": ".git",
+        "type": "folder"
+      },
+      {
+        "value": "miniprogram-assets",
+        "type": "folder"
+      },
+      {
+        "value": "scripts",
+        "type": "folder"
+      },
+      {
+        "value": "plant-archive-v2-preview.png",
+        "type": "file"
+      },
+      {
+        "value": "plant-archive-v2-mobile-preview.png",
+        "type": "file"
+      },
+      {
+        "value": "index.html",
+        "type": "file"
+      },
+      {
+        "value": "plant-archive-v2.html",
+        "type": "file"
+      },
+      {
+        "value": "PLANT-ARCHIVE-GITHUB-PAGES.md",
+        "type": "file"
+      },
+      {
+        "value": "WECHAT-MINIPROGRAM.md",
+        "type": "file"
+      },
+      {
+        "value": "MINIPROGRAM-SUBMISSION-CHECKLIST.md",
+        "type": "file"
+      },
+      {
+        "value": "WECHAT-SUBMISSION-COPY.md",
+        "type": "file"
+      },
+      {
+        "value": "README.md",
+        "type": "file"
+      },
+      {
+        "value": "site.webmanifest",
+        "type": "file"
+      },
+      {
+        "value": "apple-touch-icon.png",
+        "type": "file"
+      },
+      {
+        "value": "plant-hero-morning.png",
+        "type": "file"
+      },
+      {
+        "value": "plant-hero.png",
+        "type": "file"
+      },
+      {
+        "value": "package.json",
+        "type": "file"
+      },
+      {
+        "value": ".gitignore",
+        "type": "file"
+      },
+      {
+        "value": "project.private.config.json",
+        "type": "file"
+      }
+    ],
+    "include": []
+  },
+  "setting": {
+    "urlCheck": true,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true,
+    "compileHotReLoad": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "swc": false,
+    "disableSWC": true,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
+  },
+  "compileType": "miniprogram",
+  "libVersion": "3.8.0",
+  "appid": "touristappid",
+  "projectname": "plant-archive-v2",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "植物档案首页",
+          "pathName": "pages/index/index",
+          "query": "",
+          "scene": null
+        },
+        {
+          "name": "植物详情页",
+          "pathName": "pages/detail/detail",
+          "query": "id=CY-001",
+          "scene": null
+        },
+        {
+          "name": "隐私与数据说明",
+          "pathName": "pages/privacy/privacy",
+          "query": "",
+          "scene": null
+        }
+      ]
+    }
+  },
+  "simulatorPluginLibVersion": {},
+  "editorSetting": {}
+}

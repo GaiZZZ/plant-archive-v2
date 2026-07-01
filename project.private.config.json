@@ -1,0 +1,23 @@
+{
+  "description": "本地微信开发者工具偏好配置，不参与小程序上传包。",
+  "setting": {
+    "compileHotReLoad": true,
+    "urlCheck": true,
+    "coverView": false,
+    "lazyloadPlaceholderEnable": false,
+    "skylineRenderEnable": false,
+    "preloadBackgroundData": false,
+    "autoAudits": false,
+    "useApiHook": true,
+    "showShadowRootInWxmlPanel": false,
+    "useStaticServer": false,
+    "useLanDebug": false,
+    "showES6CompileOption": false,
+    "checkInvalidKey": true,
+    "ignoreDevUnusedFiles": true,
+    "bigPackageSizeSupport": false
+  },
+  "condition": {},
+  "libVersion": "3.8.0",
+  "projectname": "plant-archive-v2"
+}

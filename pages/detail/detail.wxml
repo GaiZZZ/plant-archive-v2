@@ -1,0 +1,68 @@
+<view class="detail-shell" wx:if="{{plant}}">
+  <view class="detail-hero">
+    <image
+      wx:if="{{plant.cover}}"
+      class="detail-cover"
+      src="{{plant.cover}}"
+      mode="aspectFill"
+    />
+    <view wx:else class="detail-cover detail-cover-empty">
+      <text class="empty-mark">{{plant.code}}</text>
+      <text class="empty-copy">暂无封面</text>
+    </view>
+
+    <view class="detail-title-block">
+      <text class="plant-id">{{plant.id}}</text>
+      <text class="plant-name">{{plant.name}}</text>
+      <view class="family-row">
+        <text class="family-code" style="background: {{familyColor}};">{{plant.code}}</text>
+        <text class="family-name">{{plant.family}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="score-panel">
+    <view class="score-heading">
+      <text class="panel-label">Status Score</text>
+      <text class="score-value">{{plant.scoreText}}</text>
+    </view>
+    <view class="score-meter">
+      <view class="score-meter-bar" style="width: {{scorePercent}};"></view>
+    </view>
+    <text class="stage-text">{{plant.stage}}</text>
+    <view class="detail-actions">
+      <button class="detail-action primary" bindtap="chooseCover">更换封面</button>
+      <button class="detail-action" bindtap="goHomeForEdit">回首页编辑</button>
+    </view>
+  </view>
+
+  <view class="info-panel">
+    <view class="info-item">
+      <text class="panel-label">Personality</text>
+      <text class="info-value">{{plant.personality}}</text>
+    </view>
+    <view class="info-item">
+      <text class="panel-label">Light</text>
+      <text class="info-value">{{plant.light}}</text>
+    </view>
+    <view class="info-item">
+      <text class="panel-label">Watering</text>
+      <text class="info-value">{{plant.watering}}</text>
+    </view>
+  </view>
+
+  <view class="info-panel">
+    <view class="info-item">
+      <text class="panel-label">Focus</text>
+      <text class="info-value">{{plant.focus}}</text>
+    </view>
+    <view class="info-item">
+      <text class="panel-label">Note</text>
+      <text class="info-value">{{plant.note}}</text>
+    </view>
+  </view>
+</view>
+
+<view wx:else class="not-found">
+  <text>没有找到这盆植物。</text>
+</view>
