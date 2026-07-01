@@ -139,6 +139,7 @@ function checkFiles() {
     "utils/archive.js",
     "utils/storage.js",
     "utils/privacy.js",
+    "plant-hero-cutout.png",
     "plant-hero-morning.jpg",
     "WECHAT-MINIPROGRAM.md",
     "MINIPROGRAM-SUBMISSION-CHECKLIST.md",
@@ -402,11 +403,30 @@ function checkDocsConsistency() {
     "Docs should describe the collection and photo check-in product structure"
   );
   assert(
+    readme.includes("拍照识别 + 健康诊断 + 图鉴收集 + 成长相册") &&
+      onlineGuide.includes("拍照识别、健康诊断和 AI 养护策略") &&
+      submissionChecklist.includes("拍照识别、健康诊断和 AI 养护策略") &&
+      submissionCopy.includes("拍照识别、健康诊断和 AI 养护策略"),
+    "Docs should keep the identify, diagnose, collect, and growth album positioning"
+  );
+  assert(
     indexPage.includes("Plant Pokédex") &&
       indexPage.includes("data-section=\"collection\"") &&
       indexPage.includes("data-section=\"capture\"") &&
-      indexPage.includes("capturePlant"),
+      indexPage.includes("capturePlant") &&
+      indexPage.includes("collectionStats") &&
+      indexPage.includes("pokedexEntries") &&
+      indexPage.includes("pokedex-card") &&
+      indexPage.includes("图鉴进度") &&
+      indexPage.includes("成长相册") &&
+      indexPage.includes("未点亮"),
     "Home page should expose collection and photo check-in sections"
+  );
+  assert(
+    indexPage.includes("diagnosisResult.identify") &&
+      indexPage.includes("diagnosisResult.diagnose") &&
+      indexPage.includes("diagnosisResult.carePlan"),
+    "Home diagnosis result should show identify, diagnose, and care plan sections"
   );
   assert(
     detailPage.includes("植物百科方案") &&
@@ -425,6 +445,7 @@ function checkPackageSize() {
     /^app\.(js|json|wxss)$/,
     /^sitemap\.json$/,
     /^project\.config\.json$/,
+    /^plant-hero-cutout\.png$/,
     /^plant-hero-morning\.jpg$/,
     /^pages\/(index|detail|privacy)\/[^/]+\.(js|json|wxml|wxss)$/,
     /^utils\/(plants|archive|storage|privacy)\.js$/

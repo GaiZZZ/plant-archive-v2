@@ -19,11 +19,21 @@ Page({
     dashboardCards: [],
     filterItems: [],
     groupedPlants: [],
+    pokedexEntries: [],
     todayPlants: [],
     capturePlants: [],
+    collectionStats: {
+      total: 0,
+      collected: 0,
+      checkins: 0,
+      progressPercent: "0%",
+      progressText: "0%",
+      albumText: "0 张"
+    },
     diagnosisPhoto: "",
     diagnosisResult: null,
     filterSummary: "",
+    pokedexSummary: "",
     heroTitle: "今天的小森林状态不错",
     heroSubtitle: "",
     heroBriefing: "",
@@ -114,12 +124,87 @@ Page({
       momentCount: plant.moments ? plant.moments.length : 0,
       scoreText: Number(plant.score).toFixed(1)
     }));
+    const pokedexEntries = this.getPokedexEntries(this.data.plants);
+    const visiblePokedexEntries =
+      this.data.family === "ALL"
+        ? pokedexEntries
+        : pokedexEntries.filter((entry) => entry.code === this.data.family);
+    const collectionStats = this.getCollectionStats(pokedexEntries);
+    const pokedexSummary =
+      this.data.family === "ALL"
+        ? `当前显示全部图鉴条目，共 ${visiblePokedexEntries.length} 类植物。`
+        : `当前显示 ${familyMeta[this.data.family].name} 图鉴条目。`;
 
     this.setData({
       ...viewModel,
       todayPlants,
-      capturePlants
+      capturePlants,
+      pokedexEntries: visiblePokedexEntries,
+      pokedexSummary,
+      collectionStats
     });
+  },
+
+  getPokedexEntries(plants) {
+    return Object.keys(familyMeta).map((code) => {
+      const family = familyMeta[code];
+      const members = plants.filter((plant) => plant.code === code);
+      const collectedMembers = members.filter((plant) => {
+        const moments = plant.moments || [];
+        return Boolean(plant.cover || moments.length);
+      });
+      const coverMember = collectedMembers.find((plant) => plant.cover);
+      const samplePlant = collectedMembers[0] || members[0];
+      const momentCount = members.reduce((sum, plant) => {
+        const moments = plant.moments || [];
+        return sum + moments.length;
+      }, 0);
+      const scoreTotal = members.reduce((sum, plant) => sum + Number(plant.score), 0);
+      const avgScore = members.length ? scoreTotal / members.length : 0;
+      const previewNames = members.slice(0, 2).map((plant) => plant.name).join("、");
+      const extraCount = members.length > 2 ? ` 等 ${members.length} 盆` : "";
+      const collected = collectedMembers.length > 0;
+
+      return {
+        code,
+        name: family.name,
+        color: family.color,
+        plantId: samplePlant ? samplePlant.id : "",
+        collected,
+        locked: !collected,
+        cover: coverMember && coverMember.cover ? coverMember.cover : "/plant-hero-cutout.png",
+        memberCount: members.length,
+        momentCount,
+        memberText: `${members.length} 个养护档案`,
+        speciesText: `${previewNames}${extraCount}`,
+        statusText: collected ? `已点亮 · ${momentCount} 次打卡` : "未解锁 · 拍第一张点亮",
+        albumText: `${momentCount} 张成长照片`,
+        collectedText: `${collectedMembers.length}/${members.length} 盆已开始养护`,
+        scoreText: avgScore ? avgScore.toFixed(1) : "--"
+      };
+    });
+  },
+
+  getCollectionStats(entries) {
+    const total = entries.length;
+    let collected = 0;
+    let checkins = 0;
+
+    entries.forEach((entry) => {
+      if (entry.collected) collected += 1;
+      checkins += entry.momentCount;
+    });
+
+    const progress = total ? Math.round((collected / total) * 100) : 0;
+
+    return {
+      total,
+      collected,
+      checkins,
+      progressPercent: `${progress}%`,
+      progressText: `${progress}%`,
+      albumText: `${checkins} 张`
+    };
   },
 
   createMoment(plant, photo) {
@@ -137,15 +222,32 @@ Page({
   },
 
   formatDiagnosisResult(plant, moment, isFirstCapture) {
+    const score = Number(plant.score);
+    const healthLevel = score >= 9.5 ? "状态优秀" : score >= 8.8 ? "基本健康" : "需要观察";
+
     return {
       title: `${plant.name} 已进入养护档案`,
       status: isFirstCapture ? "首次收集" : "新增打卡",
       summary: moment.summary,
-      actions: [
-        moment.advice,
-        `固定百科方案：${plant.watering}`,
-        `光照偏好：${plant.light}`
-      ]
+      identify: {
+        label: "识别结果",
+        title: plant.name,
+        copy: `${plant.family} · ${plant.code}。这张照片已归入你的植物图鉴。`
+      },
+      diagnose: {
+        label: "健康诊断",
+        title: healthLevel,
+        copy: `当前档案健康分 ${Number(plant.score).toFixed(1)}。${plant.focus}`
+      },
+      carePlan: {
+        label: "养护建议",
+        title: "接下来这样照看",
+        items: [
+          moment.advice,
+          `浇水：${plant.watering}`,
+          `光照：${plant.light}`
+        ]
+      }
     };
   },
 
