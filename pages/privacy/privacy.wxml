@@ -9,11 +9,11 @@
     <text class="section-title">会使用哪些能力</text>
     <view class="item">
       <text class="item-title">相机</text>
-      <text class="item-copy">用于拍摄植物照片，作为植物档案封面。</text>
+      <text class="item-copy">用于拍摄植物照片，作为植物档案封面或诊断素材。</text>
     </view>
     <view class="item">
       <text class="item-title">相册</text>
-      <text class="item-copy">用于选择本地植物照片，作为植物档案封面。</text>
+      <text class="item-copy">用于选择本地植物照片，作为植物档案封面或诊断素材。</text>
     </view>
     <view class="item">
       <text class="item-title">本地缓存</text>

@@ -1,5 +1,5 @@
 const { defaultPlants, familyMeta } = require("../../utils/plants");
-const { buildArchiveView } = require("../../utils/archive");
+const { buildArchiveView, getDashboardMetrics } = require("../../utils/archive");
 const { ensurePrivacyAuthorized } = require("../../utils/privacy");
 const {
   LOCAL_STATE_KEYS,
@@ -14,10 +14,14 @@ Page({
     family: "ALL",
     focusMode: "ALL",
     sort: "desc",
+    activeSection: "today",
     plants: [],
     dashboardCards: [],
     filterItems: [],
     groupedPlants: [],
+    todayPlants: [],
+    diagnosisPhoto: "",
+    diagnosisResult: null,
     filterSummary: "",
     heroTitle: "今天的小森林状态不错",
     heroSubtitle: "",
@@ -95,9 +99,23 @@ Page({
       focusMode: this.data.focusMode,
       sort: this.data.sort
     });
+    const metrics = getDashboardMetrics(this.data.plants);
+    const todayPlants = (metrics.watchPlants.length ? metrics.watchPlants : metrics.duePlants)
+      .slice(0, 4)
+      .map((plant) => ({
+        ...plant,
+        scoreText: Number(plant.score).toFixed(1)
+      }));
 
     this.setData({
-      ...viewModel
+      ...viewModel,
+      todayPlants
+    });
+  },
+
+  switchSection(event) {
+    this.setData({
+      activeSection: event.currentTarget.dataset.section
     });
   },
 
@@ -241,6 +259,39 @@ Page({
           icon: "none"
         });
       }
+    });
+  },
+
+  startAiDiagnosis() {
+    ensurePrivacyAuthorized(() => {
+      wx.chooseMedia({
+        count: 1,
+        mediaType: ["image"],
+        sourceType: ["album", "camera"],
+        success: (res) => {
+          const tempFilePath = res.tempFiles[0].tempFilePath;
+          this.setData({
+            diagnosisPhoto: tempFilePath,
+            diagnosisResult: {
+              title: "AI 诊断入口已就绪",
+              status: "等待接入真实 AI",
+              summary: "现在先保存照片和诊断流程位置；接入云函数后，这里会返回健康判断、可能原因和养护策略。",
+              actions: [
+                "检查叶片是否有卷边、黄斑或软塌",
+                "记录最近一次浇水时间和盆土湿度",
+                "补充光照环境，方便 AI 给出更准确建议"
+              ]
+            },
+            activeSection: "diagnosis"
+          });
+        },
+        fail: () => {
+          wx.showToast({
+            title: "未选择照片",
+            icon: "none"
+          });
+        }
+      });
     });
   },
 

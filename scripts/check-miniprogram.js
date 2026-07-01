@@ -99,6 +99,10 @@ function checkConfig() {
     "app.json must include pages/privacy/privacy"
   );
   assert(appConfig.permission?.["scope.camera"]?.desc, "Camera permission desc is required");
+  assert(
+    appConfig.permission["scope.camera"].desc.includes("诊断素材"),
+    "Camera permission desc should mention diagnosis material usage"
+  );
   assert(projectConfig.compileType === "miniprogram", "compileType must be miniprogram");
   assert(projectConfig.setting.urlCheck === true, "urlCheck should stay enabled for release");
   assert(projectConfig.condition?.miniprogram?.list?.length, "Preview condition is missing");
@@ -365,6 +369,19 @@ function checkDocsConsistency() {
       privacyPage.includes("复制本地备份文本") &&
       privacyPage.includes("从剪贴板读取备份文本"),
     "Privacy page should disclose clipboard usage consistently"
+  );
+  assert(
+    privacyPage.includes("诊断素材") &&
+      submissionChecklist.includes("诊断素材") &&
+      submissionCopy.includes("诊断素材"),
+    "Privacy copy should disclose photo usage for diagnosis material"
+  );
+  assert(
+    readme.includes("AI 诊断入口") &&
+      onlineGuide.includes("AI 诊断入口") &&
+      submissionChecklist.includes("今日 / AI 诊断 / 档案") &&
+      submissionCopy.includes("诊断结果占位"),
+    "Docs should describe the AI diagnosis entry and three-section home structure"
   );
 }
 
