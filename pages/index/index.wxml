@@ -5,6 +5,11 @@
       <text class="hero-title">拍照点亮你的植物图鉴</text>
       <text class="hero-subtitle">{{heroSubtitle}}</text>
     </view>
+    <image
+      class="home-hero-plant"
+      src="/plant-hero-morning.jpg"
+      mode="aspectFit"
+    />
     <button class="hero-diagnosis-button" bindtap="startAiDiagnosis">拍照打卡</button>
   </view>
 
