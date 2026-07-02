@@ -1,4 +1,5 @@
 const { defaultPlants, familyMeta } = require("../../utils/plants");
+const { buildAiMoment } = require("../../utils/ai");
 const { ensurePrivacyAuthorized } = require("../../utils/privacy");
 const {
   PENDING_EDIT_KEY,
@@ -12,6 +13,19 @@ Page({
     plantId: "",
     plant: null,
     moments: [],
+    albumPhotos: [],
+    archiveStats: {
+      photoCount: 0,
+      latestMode: "暂无记录",
+      currentStage: ""
+    },
+    careStrategy: {
+      level: "",
+      title: "",
+      nextCheck: "",
+      reason: "",
+      actions: []
+    },
     familyColor: "#b4d4a8",
     scorePercent: "0%"
   },
@@ -44,19 +58,75 @@ Page({
       title: plant.name
     });
 
+    const rawMoments = plant.moments || [];
+    const moments = rawMoments.map((moment, index) => ({
+      ...moment,
+      modeLabel: moment.modeLabel || (moment.mode === "identify" ? "识别记录" : "健康诊断"),
+      identifiedName: moment.identifiedName || plant.name,
+      confidenceText: moment.confidenceText || "92%",
+      candidateMatches: Array.isArray(moment.candidateMatches) ? moment.candidateMatches : [],
+      scoreText: moment.scoreText || Number(plant.score).toFixed(1),
+      healthLevel: moment.healthLevel || "待观察",
+      healthIssues: Array.isArray(moment.healthIssues) ? moment.healthIssues : [],
+      careItems: Array.isArray(moment.careItems) ? moment.careItems : [],
+      displayDate: this.formatMomentDate(moment.createdAt),
+      indexText: `第 ${rawMoments.length - index} 次打卡`
+    }));
+    const albumPhotos = moments
+      .filter((moment) => moment.photo)
+      .slice(0, 6)
+      .map((moment) => ({
+        id: moment.id,
+        photo: moment.photo,
+        label: moment.displayDate
+      }));
+
     this.setData({
       plant: {
         ...plant,
         scoreText: Number(plant.score).toFixed(1)
       },
-      moments: (plant.moments || []).map((moment, index) => ({
-        ...moment,
-        displayDate: this.formatMomentDate(moment.createdAt),
-        indexText: `第 ${plant.moments.length - index} 次打卡`
-      })),
+      moments,
+      albumPhotos,
+      archiveStats: {
+        photoCount: moments.filter((moment) => moment.photo).length,
+        latestMode: moments.length ? moments[0].modeLabel : "暂无记录",
+        currentStage: plant.stage
+      },
+      careStrategy: this.buildCareStrategy(plant, moments[0]),
       familyColor: familyMeta[plant.code] ? familyMeta[plant.code].color : "#b4d4a8",
       scorePercent: `${Math.max(0, Math.min(100, Number(plant.score) * 10))}%`
     });
+  },
+
+  buildCareStrategy(plant, latestMoment) {
+    const score = Number(plant.score);
+    const needsAttention = score < 8.9;
+    const nextCheckDays = needsAttention ? 2 : score < 9.5 ? 4 : 7;
+    const nextCheck = this.formatFutureDate(nextCheckDays);
+    const level = needsAttention ? "重点观察" : score < 9.5 ? "稳定养护" : "状态优秀";
+    const title = needsAttention ? "先稳住环境，再看新叶" : "按当前节奏继续养护";
+    const reason = latestMoment
+      ? `基于最近一次${latestMoment.modeLabel}和当前健康分 ${Number(plant.score).toFixed(1)} 生成。`
+      : `基于植物百科和当前健康分 ${Number(plant.score).toFixed(1)} 生成。`;
+
+    return {
+      level,
+      title,
+      nextCheck,
+      reason,
+      actions: [
+        `浇水：${plant.watering}`,
+        `光照：${plant.light}`,
+        `观察：${plant.focus}`
+      ]
+    };
+  },
+
+  formatFutureDate(days) {
+    const date = new Date();
+    date.setDate(date.getDate() + days);
+    return `${date.getMonth() + 1}月${date.getDate()}日`;
   },
 
   formatMomentDate(createdAt) {
@@ -66,20 +136,6 @@ Page({
     const month = date.getMonth() + 1;
     const day = date.getDate();
     return `${month}月${day}日`;
-  },
-
-  createMoment(plant, photo) {
-    const now = new Date();
-    const score = Number(plant.score).toFixed(1);
-
-    return {
-      id: `${plant.id}-${now.getTime()}`,
-      photo,
-      createdAt: now.toISOString(),
-      stage: plant.stage,
-      summary: `本次打卡健康分 ${score}，先按当前养护方案继续观察。`,
-      advice: `AI 策略占位：结合 ${plant.light} 和 ${plant.watering}，后续会根据照片变化给出更具体建议。`
-    };
   },
 
   onShareAppMessage() {
@@ -148,7 +204,7 @@ Page({
     if (!plant) return;
 
     const moments = plant.moments || [];
-    const moment = this.createMoment(plant, cover);
+    const moment = buildAiMoment(plant, cover, "diagnose", this.loadPlants());
     if (!this.persistPlantOverride(plantId, {
       cover: plant.cover || cover,
       moments: [moment, ...moments]
@@ -177,7 +233,11 @@ Page({
   },
 
   loadPlant(plantId) {
+    return this.loadPlants().find((plant) => plant.id === plantId);
+  },
+
+  loadPlants() {
     const overrides = wx.getStorageSync(STORAGE_KEY) || {};
-    return mergePlantOverrides(defaultPlants, overrides).find((plant) => plant.id === plantId);
+    return mergePlantOverrides(defaultPlants, overrides);
   }
 });

@@ -18,6 +18,20 @@
         <text class="family-code" style="background: {{familyColor}};">{{plant.code}}</text>
         <text class="family-name">{{plant.family}}</text>
       </view>
+      <view class="archive-stat-row">
+        <view class="archive-stat">
+          <text class="archive-stat-value">{{archiveStats.photoCount}}</text>
+          <text class="archive-stat-label">成长照片</text>
+        </view>
+        <view class="archive-stat">
+          <text class="archive-stat-value">{{archiveStats.latestMode}}</text>
+          <text class="archive-stat-label">最近记录</text>
+        </view>
+        <view class="archive-stat">
+          <text class="archive-stat-value">{{plant.scoreText}}</text>
+          <text class="archive-stat-label">健康分</text>
+        </view>
+      </view>
     </view>
   </view>
 
@@ -33,6 +47,45 @@
     <view class="detail-actions">
       <button class="detail-action primary" bindtap="chooseCover">拍照打卡</button>
       <button class="detail-action" bindtap="goHomeForEdit">回首页编辑</button>
+    </view>
+  </view>
+
+  <view class="strategy-panel">
+    <view class="strategy-header">
+      <view>
+        <text class="panel-label">AI Care Plan</text>
+        <text class="panel-title">{{careStrategy.title}}</text>
+      </view>
+      <text class="strategy-level">{{careStrategy.level}}</text>
+    </view>
+    <text class="strategy-reason">{{careStrategy.reason}}</text>
+    <view class="strategy-next-row">
+      <text class="strategy-next-label">下次复查</text>
+      <text class="strategy-next-date">{{careStrategy.nextCheck}}</text>
+    </view>
+    <view class="strategy-action-list">
+      <text class="strategy-action" wx:for="{{careStrategy.actions}}" wx:key="*this">{{item}}</text>
+    </view>
+  </view>
+
+  <view class="album-panel">
+    <view class="album-header">
+      <view>
+        <text class="panel-label">Growth Album</text>
+        <text class="panel-title">成长相册</text>
+      </view>
+      <button class="album-capture-button" bindtap="chooseCover">继续拍照</button>
+    </view>
+    <scroll-view wx:if="{{albumPhotos.length}}" class="album-scroll" scroll-x="true">
+      <view class="album-track">
+        <view class="album-photo-card" wx:for="{{albumPhotos}}" wx:key="id">
+          <image class="album-photo" src="{{item.photo}}" mode="aspectFill" />
+          <text class="album-date">{{item.label}}</text>
+        </view>
+      </view>
+    </scroll-view>
+    <view wx:else class="album-empty">
+      <text class="timeline-summary">还没有成长照片。第一次拍照后，它会成为这株植物的相册封面。</text>
     </view>
   </view>
 
@@ -78,8 +131,37 @@
         <image wx:if="{{item.photo}}" class="timeline-photo" src="{{item.photo}}" mode="aspectFill" />
         <view class="timeline-body">
           <text class="timeline-date">{{item.displayDate}} · {{item.indexText}}</text>
+          <view class="history-meta-row">
+            <text class="history-mode">{{item.modeLabel}}</text>
+            <text class="history-health">{{item.healthLevel}}</text>
+          </view>
+          <text class="history-identify">识别：{{item.identifiedName}}</text>
+          <view class="history-result-row">
+            <text class="history-result-chip">可信度 {{item.confidenceText}}</text>
+            <text class="history-result-chip">健康分 {{item.scoreText}}</text>
+          </view>
+          <view class="history-candidate-list" wx:if="{{item.candidateMatches.length}}">
+            <text class="history-candidate-title">识别候选</text>
+            <view class="history-candidate" wx:for="{{item.candidateMatches}}" wx:key="id">
+              <text class="history-candidate-name">{{item.name}}</text>
+              <text class="history-candidate-score">{{item.confidenceText}}</text>
+            </view>
+          </view>
+          <view class="history-issue-list" wx:if="{{item.healthIssues.length}}">
+            <text class="history-candidate-title">健康问题</text>
+            <view class="history-issue" wx:for="{{item.healthIssues}}" wx:key="title">
+              <view class="history-issue-heading">
+                <text class="history-issue-title">{{item.title}}</text>
+                <text class="history-issue-severity">{{item.severity}}</text>
+              </view>
+              <text class="history-issue-action">{{item.action}}</text>
+            </view>
+          </view>
           <text class="timeline-summary">{{item.summary}}</text>
           <text class="timeline-advice">{{item.advice}}</text>
+          <view class="history-actions" wx:if="{{item.careItems.length}}">
+            <text class="history-action" wx:for="{{item.careItems}}" wx:key="*this">{{item}}</text>
+          </view>
         </view>
       </view>
     </view>

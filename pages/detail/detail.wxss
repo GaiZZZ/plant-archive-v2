@@ -4,6 +4,8 @@
 
 .detail-hero,
 .score-panel,
+.strategy-panel,
+.album-panel,
 .info-panel,
 .timeline-panel,
 .not-found {
@@ -85,7 +87,48 @@
   font-size: 25rpx;
 }
 
+.archive-stat-row {
+  display: flex;
+  margin-top: 24rpx;
+}
+
+.archive-stat {
+  flex: 1;
+  min-width: 0;
+  padding: 16rpx 12rpx;
+  border: 1rpx solid rgba(77, 97, 81, 0.1);
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.archive-stat + .archive-stat {
+  margin-left: 12rpx;
+}
+
+.archive-stat-value,
+.archive-stat-label {
+  display: block;
+  text-align: center;
+}
+
+.archive-stat-value {
+  color: #203126;
+  font-size: 25rpx;
+  font-weight: 800;
+  line-height: 1.2;
+  word-break: break-all;
+}
+
+.archive-stat-label {
+  margin-top: 8rpx;
+  color: #698067;
+  font-size: 20rpx;
+  line-height: 1.25;
+}
+
 .score-panel,
+.strategy-panel,
+.album-panel,
 .info-panel,
 .timeline-panel {
   margin-top: 24rpx;
@@ -166,6 +209,144 @@
   background: #47795e;
 }
 
+.strategy-panel {
+  background: linear-gradient(135deg, rgba(236, 243, 229, 0.96), rgba(255, 253, 248, 0.9));
+}
+
+.strategy-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.strategy-level {
+  flex: 0 0 auto;
+  margin-left: 18rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 999rpx;
+  color: #fffdf8;
+  background: #203126;
+  font-size: 22rpx;
+  font-weight: 800;
+}
+
+.strategy-reason {
+  display: block;
+  margin-top: 16rpx;
+  color: #536355;
+  font-size: 24rpx;
+  line-height: 1.48;
+}
+
+.strategy-next-row {
+  display: flex;
+  align-items: center;
+  margin-top: 20rpx;
+  padding: 18rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.strategy-next-label {
+  flex: 1;
+  min-width: 0;
+  color: #698067;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.strategy-next-date {
+  flex: 0 0 auto;
+  color: #203126;
+  font-size: 26rpx;
+  font-weight: 800;
+}
+
+.strategy-action-list {
+  margin-top: 16rpx;
+}
+
+.strategy-action {
+  display: block;
+  padding: 16rpx 18rpx;
+  border-radius: 16rpx;
+  color: #203126;
+  background: rgba(255, 255, 255, 0.62);
+  font-size: 24rpx;
+  line-height: 1.45;
+}
+
+.strategy-action + .strategy-action {
+  margin-top: 12rpx;
+}
+
+.album-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.album-capture-button {
+  flex: 0 0 auto;
+  width: 156rpx;
+  margin-left: 18rpx;
+  padding: 14rpx 12rpx;
+  border-radius: 16rpx;
+  color: #fffdf8;
+  background: #203126;
+  font-size: 23rpx;
+  font-weight: 800;
+}
+
+.album-capture-button::after {
+  border: 0;
+}
+
+.album-scroll {
+  width: 100%;
+  margin-top: 22rpx;
+  white-space: nowrap;
+}
+
+.album-track {
+  display: flex;
+}
+
+.album-photo-card {
+  flex: 0 0 auto;
+  width: 180rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(77, 97, 81, 0.12);
+  border-radius: 20rpx;
+  background: rgba(255, 253, 248, 0.82);
+}
+
+.album-photo-card + .album-photo-card {
+  margin-left: 14rpx;
+}
+
+.album-photo {
+  display: block;
+  width: 180rpx;
+  height: 180rpx;
+}
+
+.album-date {
+  display: block;
+  padding: 12rpx;
+  color: #536355;
+  font-size: 21rpx;
+  font-weight: 700;
+  text-align: center;
+}
+
+.album-empty {
+  margin-top: 22rpx;
+  padding: 22rpx;
+  border-radius: 18rpx;
+  background: rgba(236, 243, 229, 0.72);
+}
+
 .panel-title + .info-item {
   margin-top: 22rpx;
 }
@@ -239,6 +420,139 @@
   font-weight: 700;
 }
 
+.history-meta-row {
+  display: flex;
+  align-items: center;
+  margin-top: 14rpx;
+}
+
+.history-mode,
+.history-health {
+  flex: 0 0 auto;
+  padding: 9rpx 12rpx;
+  border-radius: 999rpx;
+  font-size: 21rpx;
+  font-weight: 800;
+}
+
+.history-mode {
+  color: #fffdf8;
+  background: #203126;
+}
+
+.history-health {
+  margin-left: 10rpx;
+  color: #1f6f59;
+  background: rgba(31, 111, 89, 0.1);
+}
+
+.history-identify {
+  display: block;
+  margin-top: 12rpx;
+  color: #203126;
+  font-size: 25rpx;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.history-result-row {
+  display: flex;
+  flex-wrap: wrap;
+  margin-top: 10rpx;
+}
+
+.history-result-chip {
+  margin-right: 10rpx;
+  margin-bottom: 8rpx;
+  padding: 9rpx 12rpx;
+  border-radius: 999rpx;
+  color: #536355;
+  background: rgba(255, 255, 255, 0.76);
+  font-size: 21rpx;
+  font-weight: 700;
+}
+
+.history-candidate-list {
+  margin-top: 10rpx;
+  padding: 14rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 255, 255, 0.68);
+}
+
+.history-candidate-title {
+  display: block;
+  color: #698067;
+  font-size: 20rpx;
+  font-weight: 800;
+}
+
+.history-candidate {
+  display: flex;
+  align-items: center;
+  margin-top: 10rpx;
+}
+
+.history-candidate-name {
+  flex: 1;
+  min-width: 0;
+  color: #203126;
+  font-size: 22rpx;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.history-candidate-score {
+  flex: 0 0 auto;
+  margin-left: 12rpx;
+  color: #1f6f59;
+  font-size: 21rpx;
+  font-weight: 800;
+}
+
+.history-issue-list {
+  margin-top: 10rpx;
+  padding: 14rpx;
+  border-radius: 16rpx;
+  background: rgba(255, 246, 238, 0.76);
+}
+
+.history-issue {
+  margin-top: 10rpx;
+}
+
+.history-issue-heading {
+  display: flex;
+  align-items: center;
+}
+
+.history-issue-title {
+  flex: 1;
+  min-width: 0;
+  color: #203126;
+  font-size: 22rpx;
+  font-weight: 800;
+  line-height: 1.32;
+}
+
+.history-issue-severity {
+  flex: 0 0 auto;
+  margin-left: 12rpx;
+  padding: 7rpx 11rpx;
+  border-radius: 999rpx;
+  color: #fffdf8;
+  background: #8d3e59;
+  font-size: 19rpx;
+  font-weight: 800;
+}
+
+.history-issue-action {
+  display: block;
+  margin-top: 8rpx;
+  color: #536355;
+  font-size: 21rpx;
+  line-height: 1.45;
+}
+
 .timeline-summary,
 .timeline-advice {
   display: block;
@@ -250,6 +564,24 @@
 
 .timeline-advice {
   color: #536355;
+}
+
+.history-actions {
+  margin-top: 14rpx;
+}
+
+.history-action {
+  display: block;
+  padding: 14rpx 16rpx;
+  border-radius: 14rpx;
+  color: #203126;
+  background: rgba(236, 243, 229, 0.72);
+  font-size: 23rpx;
+  line-height: 1.42;
+}
+
+.history-action + .history-action {
+  margin-top: 10rpx;
 }
 
 .timeline-empty {

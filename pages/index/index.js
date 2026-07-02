@@ -1,5 +1,10 @@
 const { defaultPlants, familyMeta } = require("../../utils/plants");
 const { buildArchiveView, getDashboardMetrics } = require("../../utils/archive");
+const {
+  buildAiMoment,
+  buildArchivedMoment,
+  formatDiagnosisResult
+} = require("../../utils/ai");
 const { ensurePrivacyAuthorized } = require("../../utils/privacy");
 const {
   LOCAL_STATE_KEYS,
@@ -38,6 +43,12 @@ Page({
     diagnosisPhoto: "",
     diagnosisResult: null,
     pendingCapture: null,
+    savedPlantId: "",
+    savedPlantName: "",
+    saveTargetIndex: 0,
+    saveTargetLabels: [],
+    selectedSaveTargetLabel: "",
+    selectedCandidateId: "",
     captureMode: "diagnose",
     filterSummary: "",
     plantLibrarySummary: "",
@@ -148,7 +159,8 @@ Page({
       plantPreview: plantLibraryEntries.slice(0, 3),
       homeStats,
       plantLibrarySummary,
-      collectionStats
+      collectionStats,
+      saveTargetLabels: this.data.plants.map((plant) => `${plant.name} · ${plant.id}`)
     });
   },
 
@@ -211,54 +223,6 @@ Page({
       progressPercent: `${progress}%`,
       progressText: `${progress}%`,
       albumText: `${checkins} 张`
-    };
-  },
-
-  createMoment(plant, photo) {
-    const now = new Date();
-    const score = Number(plant.score).toFixed(1);
-
-    return {
-      id: `${plant.id}-${now.getTime()}`,
-      photo,
-      createdAt: now.toISOString(),
-      stage: plant.stage,
-      summary: `本次打卡健康分 ${score}，先按当前养护方案继续观察。`,
-      advice: `AI 策略占位：结合 ${plant.light} 和 ${plant.watering}，后续会根据照片变化给出更具体建议。`
-    };
-  },
-
-  formatDiagnosisResult(plant, moment, isFirstCapture, mode, isSaved) {
-    const score = Number(plant.score);
-    const healthLevel = score >= 9.5 ? "状态优秀" : score >= 8.8 ? "基本健康" : "需要观察";
-    const modeText = mode === "identify" ? "识别完成" : "诊断完成";
-    const saveText = isFirstCapture ? "加入我的植物" : "保存到成长档案";
-
-    return {
-      title: mode === "identify" ? `识别为 ${plant.name}` : `${plant.name} 健康诊断`,
-      status: isSaved ? "已保存" : modeText,
-      saveText,
-      saved: Boolean(isSaved),
-      summary: moment.summary,
-      identify: {
-        label: "识别结果",
-        title: plant.name,
-        copy: `${plant.family} · ${plant.code}。你可以先查看结果，再决定是否加入我的植物。`
-      },
-      diagnose: {
-        label: "健康诊断",
-        title: healthLevel,
-        copy: `当前档案健康分 ${Number(plant.score).toFixed(1)}。${plant.focus}`
-      },
-      carePlan: {
-        label: "养护建议",
-        title: "接下来这样照看",
-        items: [
-          moment.advice,
-          `浇水：${plant.watering}`,
-          `光照：${plant.light}`
-        ]
-      }
     };
   },
 
@@ -481,18 +445,29 @@ Page({
   prepareCaptureResult(plant, photo, mode) {
     const moments = plant.moments || [];
     const isFirstCapture = !plant.cover && !moments.length;
-    const moment = this.createMoment(plant, photo);
+    const moment = buildAiMoment(plant, photo, mode, this.data.plants);
+    const saveTargetIndex = Math.max(
+      0,
+      this.data.plants.findIndex((item) => item.id === plant.id)
+    );
+    const selectedSaveTargetLabel = this.data.saveTargetLabels[saveTargetIndex] || plant.name;
 
     this.setData({
       diagnosisPhoto: photo,
-      diagnosisResult: this.formatDiagnosisResult(plant, moment, isFirstCapture, mode, false),
+      diagnosisResult: formatDiagnosisResult(plant, moment, isFirstCapture, mode, false),
       pendingCapture: {
         plantId: plant.id,
+        targetPlantId: plant.id,
         photo,
         moment,
         isFirstCapture,
         mode
       },
+      saveTargetIndex,
+      selectedSaveTargetLabel,
+      selectedCandidateId: plant.id,
+      savedPlantId: "",
+      savedPlantName: "",
       activeSection: mode === "identify" ? "identify" : "diagnose"
     });
     wx.showToast({
@@ -501,37 +476,141 @@ Page({
     });
   },
 
+  onSaveTargetChange(event) {
+    const saveTargetIndex = Number(event.detail.value);
+    const target = this.data.plants[saveTargetIndex];
+    const pendingCapture = this.data.pendingCapture;
+
+    if (!target || !pendingCapture) return;
+
+    const matchedPlant = this.data.plants.find((item) => item.id === pendingCapture.plantId);
+    if (!matchedPlant) return;
+
+    const targetMoments = target.moments || [];
+    const isFirstCapture = !target.cover && !targetMoments.length;
+
+    this.setData({
+      saveTargetIndex,
+      selectedSaveTargetLabel: this.data.saveTargetLabels[saveTargetIndex] || target.name,
+      diagnosisResult: formatDiagnosisResult(
+        matchedPlant,
+        pendingCapture.moment,
+        isFirstCapture,
+        pendingCapture.mode,
+        false
+      ),
+      pendingCapture: {
+        ...pendingCapture,
+        targetPlantId: target.id,
+        isFirstCapture
+      }
+    });
+  },
+
+  selectCandidateMatch(event) {
+    const plantId = event.currentTarget.dataset.plantId;
+    const pendingCapture = this.data.pendingCapture;
+    const plant = this.data.plants.find((item) => item.id === plantId);
+
+    if (!plant || !pendingCapture) return;
+
+    const moments = plant.moments || [];
+    const isFirstCapture = !plant.cover && !moments.length;
+    const moment = buildAiMoment(plant, pendingCapture.photo, pendingCapture.mode, this.data.plants, pendingCapture.moment.createdAt);
+    const saveTargetIndex = Math.max(
+      0,
+      this.data.plants.findIndex((item) => item.id === plant.id)
+    );
+
+    this.setData({
+      diagnosisResult: formatDiagnosisResult(plant, moment, isFirstCapture, pendingCapture.mode, false),
+      pendingCapture: {
+        ...pendingCapture,
+        plantId: plant.id,
+        targetPlantId: plant.id,
+        moment,
+        isFirstCapture
+      },
+      saveTargetIndex,
+      selectedSaveTargetLabel: this.data.saveTargetLabels[saveTargetIndex] || plant.name,
+      selectedCandidateId: plant.id
+    });
+  },
+
   savePendingCapture() {
     const pendingCapture = this.data.pendingCapture;
     if (!pendingCapture) return;
 
-    const plant = this.data.plants.find((item) => item.id === pendingCapture.plantId);
+    const plant = this.data.plants.find((item) => item.id === pendingCapture.targetPlantId);
     if (!plant) return;
 
     this.savePlantMoment(plant, pendingCapture);
   },
 
+  discardPendingCapture() {
+    this.setData({
+      diagnosisPhoto: "",
+      diagnosisResult: null,
+      pendingCapture: null,
+      savedPlantId: "",
+      savedPlantName: "",
+      selectedSaveTargetLabel: "",
+      selectedCandidateId: ""
+    });
+    wx.showToast({
+      title: "未保存结果",
+      icon: "none"
+    });
+  },
+
+  retakePendingCapture() {
+    const pendingCapture = this.data.pendingCapture;
+    const mode = pendingCapture ? pendingCapture.mode : this.data.captureMode;
+    const plantId = pendingCapture ? pendingCapture.plantId : "";
+
+    if (plantId) {
+      this.capturePlantById(plantId, mode);
+      return;
+    }
+
+    this.startCaptureMode(mode);
+  },
+
   savePlantMoment(plant, pendingCapture) {
     const moments = plant.moments || [];
+    const isFirstCapture = !plant.cover && !moments.length;
+    const matchedPlant = this.data.plants.find((item) => item.id === pendingCapture.plantId) || plant;
+    const archivedMoment = buildArchivedMoment(pendingCapture.moment, plant);
 
     this.updatePlant(plant.id, {
       cover: plant.cover || pendingCapture.photo,
-      moments: [pendingCapture.moment, ...moments]
+      moments: [archivedMoment, ...moments]
     });
     this.setData({
-      diagnosisResult: this.formatDiagnosisResult(
-        plant,
-        pendingCapture.moment,
-        pendingCapture.isFirstCapture,
+      diagnosisResult: formatDiagnosisResult(
+        matchedPlant,
+        archivedMoment,
+        isFirstCapture,
         pendingCapture.mode,
         true
       ),
       pendingCapture: null,
+      savedPlantId: plant.id,
+      savedPlantName: plant.name,
       activeSection: pendingCapture.mode === "identify" ? "identify" : "diagnose"
     });
     wx.showToast({
-      title: pendingCapture.isFirstCapture ? "已加入我的植物" : "已保存档案",
+      title: isFirstCapture ? "已加入我的植物" : "已保存档案",
       icon: "success"
+    });
+  },
+
+  openSavedPlantDetail() {
+    const plantId = this.data.savedPlantId;
+    if (!plantId) return;
+
+    wx.navigateTo({
+      url: `/pages/detail/detail?id=${encodeURIComponent(plantId)}`
     });
   },
 

@@ -55,9 +55,40 @@ function sanitizePlantPatch(patch = {}) {
         id: typeof moment.id === "string" ? moment.id : "",
         photo: typeof moment.photo === "string" ? moment.photo : "",
         createdAt: typeof moment.createdAt === "string" ? moment.createdAt : "",
+        mode: typeof moment.mode === "string" ? moment.mode : "",
+        modeLabel: typeof moment.modeLabel === "string" ? moment.modeLabel : "",
+        identifiedName: typeof moment.identifiedName === "string" ? moment.identifiedName : "",
+        confidenceText: typeof moment.confidenceText === "string" ? moment.confidenceText : "",
+        candidateMatches: Array.isArray(moment.candidateMatches)
+          ? moment.candidateMatches
+              .filter((candidate) => candidate && typeof candidate === "object")
+              .map((candidate) => ({
+                id: typeof candidate.id === "string" ? candidate.id : "",
+                name: typeof candidate.name === "string" ? candidate.name : "",
+                family: typeof candidate.family === "string" ? candidate.family : "",
+                confidenceText: typeof candidate.confidenceText === "string" ? candidate.confidenceText : ""
+              }))
+              .filter((candidate) => candidate.id && candidate.name)
+          : [],
+        scoreText: typeof moment.scoreText === "string" ? moment.scoreText : "",
+        healthLevel: typeof moment.healthLevel === "string" ? moment.healthLevel : "",
+        healthIssues: Array.isArray(moment.healthIssues)
+          ? moment.healthIssues
+              .filter((issue) => issue && typeof issue === "object")
+              .map((issue) => ({
+                title: typeof issue.title === "string" ? issue.title : "",
+                severity: typeof issue.severity === "string" ? issue.severity : "",
+                summary: typeof issue.summary === "string" ? issue.summary : "",
+                action: typeof issue.action === "string" ? issue.action : ""
+              }))
+              .filter((issue) => issue.title)
+          : [],
         summary: typeof moment.summary === "string" ? moment.summary : "",
         advice: typeof moment.advice === "string" ? moment.advice : "",
-        stage: typeof moment.stage === "string" ? moment.stage : ""
+        stage: typeof moment.stage === "string" ? moment.stage : "",
+        careItems: Array.isArray(moment.careItems)
+          ? moment.careItems.filter((item) => typeof item === "string")
+          : []
       }))
       .filter((moment) => moment.id && moment.createdAt);
   }

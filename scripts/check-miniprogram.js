@@ -7,6 +7,11 @@ const {
   getFilteredPlants
 } = require("../utils/archive");
 const {
+  buildAiMoment,
+  formatDiagnosisResult,
+  getHealthLevel
+} = require("../utils/ai");
+const {
   countArchiveOverrides,
   createArchiveBackup,
   LOCAL_STATE_KEYS,
@@ -136,6 +141,7 @@ function checkFiles() {
     "pages/privacy/privacy.wxss",
     "pages/privacy/privacy.json",
     "utils/plants.js",
+    "utils/ai.js",
     "utils/archive.js",
     "utils/storage.js",
     "utils/privacy.js",
@@ -192,6 +198,19 @@ function checkArchiveLogic() {
   assert(view.dashboardCards.length === 3, "Dashboard card count changed unexpectedly");
 }
 
+function checkAiLogic() {
+  const plant = defaultPlants.find((item) => item.id === "CY-001");
+  const moment = buildAiMoment(plant, "wxfile://ai-test.jpg", "diagnose", defaultPlants, "2026-07-02T00:00:00.000Z");
+  const result = formatDiagnosisResult(plant, moment, false, "diagnose", false);
+
+  assert(getHealthLevel(plant.score) === "基本健康", "AI helper should derive health level from score");
+  assert(moment.candidateMatches.length === 3, "AI helper should return recognition candidates");
+  assert(moment.healthIssues.length >= 1, "AI helper should return diagnosis health issues");
+  assert(moment.careItems.length === 3, "AI helper should return care action items");
+  assert(result.resultStats.length === 3, "AI result should include result stats");
+  assert(result.healthIssues.length === moment.healthIssues.length, "AI result should expose health issues");
+}
+
 function checkStorageLogic() {
   const overrides = mergePlantOverride({}, "CY-001", {
     score: 7.5,
@@ -240,9 +259,23 @@ function checkStorageLogic() {
         id: "CY-001-1",
         photo: "wxfile://capture.jpg",
         createdAt: "2026-07-01T00:00:00.000Z",
+        mode: "diagnose",
+        modeLabel: "健康诊断",
+        identifiedName: "白粉彩叶芋",
+        confidenceText: "94%",
+        candidateMatches: [
+          { id: "CY-001", name: "白粉彩叶芋", family: "彩叶芋", confidenceText: "94%" },
+          { id: "CY-002", name: "红叶彩叶芋", family: "彩叶芋", confidenceText: "85%" }
+        ],
+        scoreText: "9.4",
+        healthLevel: "基本健康",
+        healthIssues: [
+          { title: "轻微环境波动", severity: "中", summary: "叶缘状态需要观察", action: "复查新叶状态" }
+        ],
         summary: "第一次打卡",
         advice: "保持观察",
-        stage: "稳定生长期"
+        stage: "稳定生长期",
+        careItems: ["浇水：保持微湿", "光照：明亮散射光"]
       },
       {
         id: "",
@@ -256,6 +289,13 @@ function checkStorageLogic() {
   assert(sanitized.unknown === undefined, "Backup unknown fields should be ignored");
   assert(sanitized.moments.length === 1, "Backup moments should keep only valid lifecycle records");
   assert(sanitized.moments[0].summary === "第一次打卡", "Backup moments should preserve lifecycle summary");
+  assert(sanitized.moments[0].mode === "diagnose", "Backup moments should preserve identify or diagnose mode");
+  assert(sanitized.moments[0].confidenceText === "94%", "Backup moments should preserve recognition confidence");
+  assert(sanitized.moments[0].candidateMatches.length === 2, "Backup moments should preserve recognition candidates");
+  assert(sanitized.moments[0].scoreText === "9.4", "Backup moments should preserve diagnosis score text");
+  assert(sanitized.moments[0].healthLevel === "基本健康", "Backup moments should preserve diagnosis health level");
+  assert(sanitized.moments[0].healthIssues.length === 1, "Backup moments should preserve diagnosis health issues");
+  assert(sanitized.moments[0].careItems.length === 2, "Backup moments should preserve care action items");
 }
 
 function checkPrivacyLogic() {
@@ -330,6 +370,7 @@ function checkRuntimeJsCompatibility() {
     "pages/detail/detail.js",
     "pages/privacy/privacy.js",
     "utils/plants.js",
+    "utils/ai.js",
     "utils/archive.js",
     "utils/storage.js",
     "utils/privacy.js"
@@ -423,26 +464,55 @@ function checkDocsConsistency() {
       indexPage.includes("plant-library-card") &&
       indexPage.includes("我的植物") &&
       indexPage.includes("成长相册") &&
-      indexPage.includes("拍照识别植物") &&
-      indexPage.includes("诊断健康问题") &&
+      indexPage.includes("识别植物") &&
+      indexPage.includes("诊断植物") &&
       indexPage.includes("plantPreview") &&
       indexPage.includes("My Plants") &&
       indexPage.includes("加入我的植物") &&
+      indexPage.includes("归档到") &&
+      indexPage.includes("resultStats") &&
+      indexPage.includes("candidateMatches") &&
+      indexPage.includes("candidate-list") &&
+      indexPage.includes("selectCandidateMatch") &&
+      indexPage.includes("selectedCandidateId") &&
+      indexPage.includes("healthIssues") &&
+      indexPage.includes("issue-list") &&
+      indexPage.includes("onSaveTargetChange") &&
       indexPage.includes("savePendingCapture") &&
+      indexPage.includes("discardPendingCapture") &&
+      indexPage.includes("retakePendingCapture") &&
+      indexPage.includes("不保存") &&
+      indexPage.includes("重拍") &&
+      indexPage.includes("openSavedPlantDetail") &&
+      indexPage.includes("查看植物档案") &&
       indexPage.includes("未加入"),
     "Home page should expose PictureThis-style identify, diagnose, and my plants workflow"
   );
   assert(
     indexPage.includes("diagnosisResult.identify") &&
       indexPage.includes("diagnosisResult.diagnose") &&
-      indexPage.includes("diagnosisResult.carePlan"),
-    "Home diagnosis result should show identify, diagnose, and care plan sections"
+      indexPage.includes("diagnosisResult.carePlan") &&
+      indexPage.includes("diagnosisResult.resultStats") &&
+      indexPage.includes("diagnosisResult.healthIssues"),
+    "Home diagnosis result should show identify, diagnose, result stats, health issues, and care plan sections"
   );
   assert(
     detailPage.includes("植物百科方案") &&
       detailPage.includes("生命周期档案") &&
-      detailPage.includes("拍照打卡"),
-    "Detail page should include encyclopedia care plan and lifecycle timeline"
+      detailPage.includes("成长相册") &&
+      detailPage.includes("AI Care Plan") &&
+      detailPage.includes("下次复查") &&
+      detailPage.includes("archiveStats") &&
+      detailPage.includes("careStrategy") &&
+      detailPage.includes("albumPhotos") &&
+      detailPage.includes("拍照打卡") &&
+      detailPage.includes("history-health") &&
+      detailPage.includes("history-identify") &&
+      detailPage.includes("history-result-chip") &&
+      detailPage.includes("history-candidate-list") &&
+      detailPage.includes("history-issue-list") &&
+      detailPage.includes("careItems"),
+    "Detail page should include AI care strategy, encyclopedia care plan, growth album, lifecycle timeline, and diagnosis history"
   );
 }
 
@@ -458,7 +528,7 @@ function checkPackageSize() {
     /^plant-hero-cutout\.png$/,
     /^plant-hero-morning\.jpg$/,
     /^pages\/(index|detail|privacy)\/[^/]+\.(js|json|wxml|wxss)$/,
-    /^utils\/(plants|archive|storage|privacy)\.js$/
+    /^utils\/(plants|ai|archive|storage|privacy)\.js$/
   ];
 
   assert(total < PACKAGE_LIMIT_BYTES, `Package is too large: ${total} bytes`);
@@ -493,6 +563,7 @@ function main() {
   checkFiles();
   checkPlantData();
   checkArchiveLogic();
+  checkAiLogic();
   checkStorageLogic();
   checkPrivacyLogic();
   checkWxssCompatibility();

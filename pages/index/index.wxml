@@ -11,8 +11,8 @@
       mode="aspectFit"
     />
     <view class="hero-actions">
-      <button class="hero-diagnosis-button" bindtap="startIdentify">拍照识别</button>
-      <button class="hero-ghost-button" bindtap="startDiagnose">诊断</button>
+      <button class="hero-diagnosis-button" bindtap="startIdentify">识别植物</button>
+      <button class="hero-ghost-button" bindtap="startDiagnose">诊断植物</button>
     </view>
   </view>
 
@@ -24,19 +24,6 @@
   </view>
 
   <view wx:if="{{activeSection == 'forYou'}}" class="section-panel">
-    <view class="quick-tool-row">
-      <button class="quick-tool-card identify" bindtap="startIdentify">
-        <text class="quick-tool-label">Identify</text>
-        <text class="quick-tool-title">拍照识别植物</text>
-        <text class="quick-tool-copy">不知道它是谁，就从这里开始。</text>
-      </button>
-      <button class="quick-tool-card diagnose" bindtap="startDiagnose">
-        <text class="quick-tool-label">Diagnose</text>
-        <text class="quick-tool-title">诊断健康问题</text>
-        <text class="quick-tool-copy">叶片发黄、卷边、斑点都先拍一张。</text>
-      </button>
-    </view>
-
     <view class="home-snapshot">
       <view class="snapshot-item">
         <text class="snapshot-value">{{homeStats.dueCount}}</text>
@@ -77,17 +64,68 @@
       <view class="result-body">
         <text class="result-status">{{diagnosisResult.status}}</text>
         <text class="result-title">{{diagnosisResult.title}}</text>
+        <view class="result-stat-row">
+          <view class="result-stat" wx:for="{{diagnosisResult.resultStats}}" wx:key="label">
+            <text class="result-stat-value">{{item.value}}</text>
+            <text class="result-stat-label">{{item.label}}</text>
+          </view>
+        </view>
 
         <view class="result-section">
           <text class="result-label">{{diagnosisResult.identify.label}}</text>
           <text class="result-section-title">{{diagnosisResult.identify.title}}</text>
           <text class="result-summary">{{diagnosisResult.identify.copy}}</text>
+          <view class="candidate-list" wx:if="{{diagnosisResult.candidateMatches.length}}">
+            <view
+              class="candidate-item {{item.id == selectedCandidateId ? 'selected' : ''}}"
+              wx:for="{{diagnosisResult.candidateMatches}}"
+              wx:key="id"
+              data-plant-id="{{item.id}}"
+              bindtap="selectCandidateMatch"
+            >
+              <view class="candidate-main">
+                <text class="candidate-name">{{item.name}}</text>
+                <text class="candidate-family">{{item.family}}</text>
+              </view>
+              <text class="candidate-confidence">{{item.confidenceText}}</text>
+            </view>
+          </view>
         </view>
 
+        <view class="result-section">
+          <text class="result-label">识别结果</text>
+          <text class="result-section-title">{{diagnosisResult.identify.title}}</text>
+          <text class="result-summary">{{diagnosisResult.identify.copy}}</text>
+          <view class="candidate-list" wx:if="{{diagnosisResult.candidateMatches.length}}">
+            <view
+              class="candidate-item {{item.id == selectedCandidateId ? 'selected' : ''}}"
+              wx:for="{{diagnosisResult.candidateMatches}}"
+              wx:key="id"
+              data-plant-id="{{item.id}}"
+              bindtap="selectCandidateMatch"
+            >
+              <view class="candidate-main">
+                <text class="candidate-name">{{item.name}}</text>
+                <text class="candidate-family">{{item.family}}</text>
+              </view>
+              <text class="candidate-confidence">{{item.confidenceText}}</text>
+            </view>
+          </view>
+        </view>
         <view class="result-section">
           <text class="result-label">{{diagnosisResult.diagnose.label}}</text>
           <text class="result-section-title">{{diagnosisResult.diagnose.title}}</text>
           <text class="result-summary">{{diagnosisResult.diagnose.copy}}</text>
+          <view class="issue-list" wx:if="{{diagnosisResult.healthIssues.length}}">
+            <view class="issue-item" wx:for="{{diagnosisResult.healthIssues}}" wx:key="title">
+              <view class="issue-heading">
+                <text class="issue-title">{{item.title}}</text>
+                <text class="issue-severity">{{item.severity}}</text>
+              </view>
+              <text class="issue-summary">{{item.summary}}</text>
+              <text class="issue-action">{{item.action}}</text>
+            </view>
+          </view>
         </view>
 
         <view class="result-section">
@@ -97,8 +135,19 @@
             <text class="action-item" wx:for="{{diagnosisResult.carePlan.items}}" wx:key="*this">{{item}}</text>
           </view>
         </view>
-        <button wx:if="{{pendingCapture}}" class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
-        <text wx:else class="result-saved-copy">结果已进入对应植物档案。</text>
+        <view wx:if="{{pendingCapture}}" class="save-target-panel">
+          <text class="save-target-label">归档到</text>
+          <picker mode="selector" range="{{saveTargetLabels}}" value="{{saveTargetIndex}}" bindchange="onSaveTargetChange">
+            <view class="save-target-picker">{{selectedSaveTargetLabel}}</view>
+          </picker>
+          <text class="save-target-copy">识别结果会保留在这次记录里，保存目标可以按实际植物调整。</text>
+          <view class="result-decision-row">
+            <button class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
+            <button class="result-secondary-button" bindtap="discardPendingCapture">不保存</button>
+            <button class="result-secondary-button" bindtap="retakePendingCapture">重拍</button>
+          </view>
+        </view>
+        <view wx:else class="result-saved-panel"><text class="result-saved-copy">结果已进入 {{savedPlantName}} 档案。</text><button class="view-detail-button" bindtap="openSavedPlantDetail">查看植物档案</button></view>
       </view>
     </view>
 
@@ -154,10 +203,26 @@
       <view class="result-body">
         <text class="result-status">{{diagnosisResult.status}}</text>
         <text class="result-title">{{diagnosisResult.title}}</text>
+        <view class="result-stat-row">
+          <view class="result-stat" wx:for="{{diagnosisResult.resultStats}}" wx:key="label">
+            <text class="result-stat-value">{{item.value}}</text>
+            <text class="result-stat-label">{{item.label}}</text>
+          </view>
+        </view>
         <view class="result-section">
           <text class="result-label">{{diagnosisResult.diagnose.label}}</text>
           <text class="result-section-title">{{diagnosisResult.diagnose.title}}</text>
           <text class="result-summary">{{diagnosisResult.diagnose.copy}}</text>
+          <view class="issue-list" wx:if="{{diagnosisResult.healthIssues.length}}">
+            <view class="issue-item" wx:for="{{diagnosisResult.healthIssues}}" wx:key="title">
+              <view class="issue-heading">
+                <text class="issue-title">{{item.title}}</text>
+                <text class="issue-severity">{{item.severity}}</text>
+              </view>
+              <text class="issue-summary">{{item.summary}}</text>
+              <text class="issue-action">{{item.action}}</text>
+            </view>
+          </view>
         </view>
         <view class="result-section">
           <text class="result-label">{{diagnosisResult.carePlan.label}}</text>
@@ -166,8 +231,19 @@
             <text class="action-item" wx:for="{{diagnosisResult.carePlan.items}}" wx:key="*this">{{item}}</text>
           </view>
         </view>
-        <button wx:if="{{pendingCapture}}" class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
-        <text wx:else class="result-saved-copy">结果已进入对应植物档案。</text>
+        <view wx:if="{{pendingCapture}}" class="save-target-panel">
+          <text class="save-target-label">归档到</text>
+          <picker mode="selector" range="{{saveTargetLabels}}" value="{{saveTargetIndex}}" bindchange="onSaveTargetChange">
+            <view class="save-target-picker">{{selectedSaveTargetLabel}}</view>
+          </picker>
+          <text class="save-target-copy">识别结果会保留在这次记录里，保存目标可以按实际植物调整。</text>
+          <view class="result-decision-row">
+            <button class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
+            <button class="result-secondary-button" bindtap="discardPendingCapture">不保存</button>
+            <button class="result-secondary-button" bindtap="retakePendingCapture">重拍</button>
+          </view>
+        </view>
+        <view wx:else class="result-saved-panel"><text class="result-saved-copy">结果已进入 {{savedPlantName}} 档案。</text><button class="view-detail-button" bindtap="openSavedPlantDetail">查看植物档案</button></view>
       </view>
     </view>
   </view>
@@ -201,10 +277,31 @@
       <view class="result-body">
         <text class="result-status">{{diagnosisResult.status}}</text>
         <text class="result-title">{{diagnosisResult.title}}</text>
+        <view class="result-stat-row">
+          <view class="result-stat" wx:for="{{diagnosisResult.resultStats}}" wx:key="label">
+            <text class="result-stat-value">{{item.value}}</text>
+            <text class="result-stat-label">{{item.label}}</text>
+          </view>
+        </view>
         <view class="result-section">
           <text class="result-label">{{diagnosisResult.identify.label}}</text>
           <text class="result-section-title">{{diagnosisResult.identify.title}}</text>
           <text class="result-summary">{{diagnosisResult.identify.copy}}</text>
+          <view class="candidate-list" wx:if="{{diagnosisResult.candidateMatches.length}}">
+            <view
+              class="candidate-item {{item.id == selectedCandidateId ? 'selected' : ''}}"
+              wx:for="{{diagnosisResult.candidateMatches}}"
+              wx:key="id"
+              data-plant-id="{{item.id}}"
+              bindtap="selectCandidateMatch"
+            >
+              <view class="candidate-main">
+                <text class="candidate-name">{{item.name}}</text>
+                <text class="candidate-family">{{item.family}}</text>
+              </view>
+              <text class="candidate-confidence">{{item.confidenceText}}</text>
+            </view>
+          </view>
         </view>
         <view class="result-section">
           <text class="result-label">{{diagnosisResult.carePlan.label}}</text>
@@ -213,8 +310,19 @@
             <text class="action-item" wx:for="{{diagnosisResult.carePlan.items}}" wx:key="*this">{{item}}</text>
           </view>
         </view>
-        <button wx:if="{{pendingCapture}}" class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
-        <text wx:else class="result-saved-copy">结果已进入对应植物档案。</text>
+        <view wx:if="{{pendingCapture}}" class="save-target-panel">
+          <text class="save-target-label">归档到</text>
+          <picker mode="selector" range="{{saveTargetLabels}}" value="{{saveTargetIndex}}" bindchange="onSaveTargetChange">
+            <view class="save-target-picker">{{selectedSaveTargetLabel}}</view>
+          </picker>
+          <text class="save-target-copy">识别结果会保留在这次记录里，保存目标可以按实际植物调整。</text>
+          <view class="result-decision-row">
+            <button class="save-result-button" bindtap="savePendingCapture">{{diagnosisResult.saveText}}</button>
+            <button class="result-secondary-button" bindtap="discardPendingCapture">不保存</button>
+            <button class="result-secondary-button" bindtap="retakePendingCapture">重拍</button>
+          </view>
+        </view>
+        <view wx:else class="result-saved-panel"><text class="result-saved-copy">结果已进入 {{savedPlantName}} 档案。</text><button class="view-detail-button" bindtap="openSavedPlantDetail">查看植物档案</button></view>
       </view>
     </view>
   </view>
